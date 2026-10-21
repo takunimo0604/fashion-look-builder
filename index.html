@@ -1,0 +1,4014 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUSH ROOM | Vintage Layering Lookbook</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Song+Myung&family=Noto+Sans+KR:wght@900&family=Playfair+Display:ital,wght@0,400;0,500;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Supabase (로그인 · 룩북 DB 저장) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* #region 공통 설정 (색·폰트·기본) */
+    :root {
+      --intro-image: url('public/이게 진짜야 제발.jpg');
+      --fade-time: 0.8s;
+      --font-title: 'IM Fell English SC', 'Song Myung', Georgia, serif;
+      --font-body: 'IM Fell English', 'Song Myung', Georgia, serif;
+      --font-ko: 'Song Myung', serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background-color: #f4efe8;
+    }
+
+    button {
+      font-family: inherit;
+    }
+    /* #endregion */
+
+    /* #region Screen 1: 인트로 */
+    /* ---------- Screen 1: 풀스크린 인트로 ---------- */
+    #intro-screen {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      /* 사진을 화면 폭에 꽉 채우고, 아래쪽(테이블) 위주로 보이게 (세로 위치 78%) */
+      background-color: #f3ece6;
+      background-image: var(--intro-image);
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center 78%;
+      color: #f4efe9;
+      text-align: center;
+      opacity: 1;
+      transition: opacity var(--fade-time) ease;
+      z-index: 100;
+    }
+
+    /* 몽환 필터: 사진을 흐리게 한 겹 더 겹쳐 빛 번짐(블룸) + 파스텔 안개 + 가장자리 라일락 비네팅 */
+    #intro-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--intro-image);
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center 78%;
+      filter: blur(14px) saturate(1.25) brightness(1.1);
+      opacity: 0.45;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+    #intro-screen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(60% 55% at 30% 35%, rgba(255, 214, 232, 0.28), transparent 70%),
+        radial-gradient(55% 50% at 72% 65%, rgba(214, 206, 255, 0.24), transparent 70%),
+        radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(200, 170, 200, 0.35) 100%);
+      mix-blend-mode: soft-light;
+      animation: dreamy-drift 14s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes dreamy-drift {
+      from { opacity: 0.85; transform: scale(1); }
+      to   { opacity: 1; transform: scale(1.04); }
+    }
+
+    .intro-content {
+      position: relative;
+      z-index: 1;
+      padding: 0 16px;
+      animation: intro-rise 1.6s ease both;
+    }
+
+    @keyframes intro-rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 첫 화면 제목: 굵은 고딕체 + 뮤트 핑크, 세로로 길게 늘려 화면을 거의 꽉 채움 (fitIntroTitle 이 글자 실제 크기에 맞춰 늘림) */
+    .intro-title {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      pointer-events: none;
+      animation: title-fade 1.6s ease both;
+    }
+    #intro-title-svg {
+      width: 94vw;
+      height: 90vh;
+      overflow: visible;
+      /* 글자 그림자: 살짝 어긋난 진한 그림자 + 넓게 퍼지는 부드러운 그림자 */
+      filter: drop-shadow(5px 7px 0 rgba(110, 72, 80, 0.45)) drop-shadow(0 12px 26px rgba(40, 28, 32, 0.35));
+    }
+    #intro-title-svg text {
+      font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 900;
+      font-size: 100px;
+      fill: #d9aeb4;
+      /* 같은 색 외곽선으로 한 번 더 두껍게 */
+      stroke: #d9aeb4;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+    }
+    @keyframes title-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* 로고는 화면 가운데 위쪽에 */
+    #intro-screen .intro-content {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 11vh;
+      z-index: 2;
+    }
+    /* 굵은 고딕 빈티지 레드 로고 + 회색 그림자를 겹겹이 쌓아 글자가 튀어나와 보이게 */
+    .intro-logo {
+      margin: 0;
+      font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', Arial, sans-serif;
+      font-weight: 900;
+      font-size: clamp(36px, 6.2vw, 92px);
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: #a3302b;
+      -webkit-text-stroke: 1.5px #a3302b;
+      /* 깔끔한 그림자: 번짐 없이 오른쪽 아래로 한 번만 어긋난 진회색 */
+      text-shadow: 6px 6px 0 rgba(70, 66, 63, 0.9);
+    }
+    /* OPEN THE DOOR! 버튼: 화면 정중앙 */
+    #intro-screen .intro-cta {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      pointer-events: none;
+      animation: intro-rise 1.6s ease 0.3s both;
+    }
+    #intro-screen .intro-cta > * { pointer-events: auto; }
+
+    .intro-sub {
+      margin: 16px 0 40px;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: clamp(14px, 2vw, 18px);
+      letter-spacing: 0.06em;
+      color: #3a302e;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 2px rgba(255, 255, 255, 0.9);
+    }
+
+    /* #region 첫 화면 버튼: 로고처럼 굵은 고딕 글자 + 뮤트 그레이시 핑크 + 번짐 없는 회색 그림자 */
+    #enter-btn.logo-btn {
+      padding: 6px 10px;
+      border: none;
+      background: none;
+      color: #b8959b;
+      -webkit-text-stroke: 1.5px #b8959b;
+      font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', Arial, sans-serif;
+      font-weight: 900;
+      font-size: clamp(32px, 6.2vw, 92px);
+      line-height: 1;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      text-shadow: 6px 6px 0 rgba(70, 66, 63, 0.9);
+      cursor: pointer;
+      transition: transform 0.35s ease, text-shadow 0.35s ease, color 0.35s ease, opacity 0.5s ease;
+    }
+    /* 마우스를 올리면 살짝 떠오르며 그림자가 길어짐 */
+    #enter-btn.logo-btn:hover,
+    #enter-btn.logo-btn:focus-visible {
+      transform: translate(-2px, -2px);
+      text-shadow: 8px 8px 0 rgba(70, 66, 63, 0.9);
+      outline: none;
+    }
+    /* 누르면 그림자 쪽으로 꾹 눌렸다가 사라지며 넘어감 */
+    #enter-btn.logo-btn.is-opening {
+      transform: translate(5px, 5px);
+      text-shadow: 1px 1px 0 rgba(70, 66, 63, 0.9);
+      opacity: 0;
+      transition: transform 0.18s ease, text-shadow 0.18s ease, opacity 0.45s ease 0.15s;
+    }
+    /* #endregion */
+
+    #intro-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #intro-screen[hidden] {
+      display: none;
+    }
+
+    /* #endregion */
+
+    /* #region Screen 1.5: 취향 질문 */
+    /* ---------- Screen 1.5: 취향 질문 (4단계) ---------- */
+    #quiz-screen {
+      --mute-purple: 176, 150, 196;
+      --mute-pink: 205, 160, 182;
+
+      min-height: 100vh;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      background-color: #2b2a2e;
+      background-image:
+        linear-gradient(rgba(24, 20, 30, 0.84), rgba(24, 20, 30, 0.92)),
+        var(--intro-image);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #f4efe9;
+      font-family: var(--font-body);
+      opacity: 0;
+      transition: opacity var(--fade-time) ease;
+    }
+
+    #quiz-screen[hidden] {
+      display: none;
+    }
+
+    #quiz-screen.fade-in {
+      opacity: 1;
+    }
+
+    .quiz-inner {
+      width: 100%;
+      max-width: 680px;
+      text-align: center;
+    }
+
+    .quiz-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .quiz-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(244, 239, 233, 0.2);
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .quiz-dots span.done {
+      background: rgb(var(--mute-pink));
+    }
+
+    .quiz-dots span.current {
+      background: rgb(var(--mute-purple));
+      box-shadow: 0 0 10px rgba(var(--mute-purple), 0.8);
+    }
+
+    .quiz-progress {
+      margin: 0 0 32px;
+      font-size: 12px;
+      letter-spacing: 0.3em;
+      opacity: 0.6;
+    }
+
+    #quiz-card {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    #quiz-card.is-hidden {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .quiz-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-style: italic;
+      letter-spacing: 0.12em;
+      color: rgb(var(--mute-pink));
+    }
+
+    .quiz-question {
+      margin: 0 0 10px;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(24px, 4.4vw, 38px);
+      letter-spacing: 0.02em;
+    }
+
+    .quiz-question-ko {
+      margin: 0 0 32px;
+      font-family: var(--font-ko);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      opacity: 0.65;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    /* 선택지가 4개인 질문: 다른 질문 버튼과 같은 크기로 2x2 로 맞춰 배치 */
+    .quiz-options.is-cube {
+      grid-template-columns: repeat(2, 1fr);
+      width: min(100%, 400px);
+      margin: 0 auto;
+    }
+
+    .option-btn {
+      padding: 18px 12px;
+      border: 1px solid rgba(244, 239, 233, 0.22);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #f4efe9;
+      font-family: var(--font-body);
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    }
+
+    .option-btn:hover,
+    .option-btn:focus-visible {
+      border-color: rgba(var(--mute-pink), 0.55);
+      outline: none;
+    }
+
+    .option-btn.active {
+      border-color: rgb(var(--mute-purple));
+      background: rgba(var(--mute-purple), 0.12);
+      box-shadow:
+        0 0 0 1px rgba(var(--mute-purple), 0.5),
+        0 0 22px rgba(var(--mute-purple), 0.45),
+        0 0 46px rgba(var(--mute-pink), 0.25);
+    }
+
+    #quiz-back {
+      margin-top: 28px;
+      border: none;
+      background: none;
+      color: rgba(244, 239, 233, 0.6);
+      font-family: var(--font-body);
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+    }
+
+    #quiz-back[hidden] {
+      display: none;
+    }
+
+    #open-closet-btn {
+      display: block;
+      margin: 32px auto 0;
+      padding: 16px 32px;
+      border: 1px solid rgba(244, 239, 233, 0.25);
+      border-radius: 999px;
+      background: transparent;
+      color: #f4efe9;
+      font-family: var(--font-body);
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      opacity: 0.35;
+      cursor: not-allowed;
+      transition: opacity 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    #open-closet-btn:enabled {
+      opacity: 1;
+      cursor: pointer;
+      border-color: rgb(var(--mute-pink));
+      animation: closet-glow 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes closet-glow {
+      from { box-shadow: 0 0 14px rgba(var(--mute-pink), 0.35); }
+      to   { box-shadow: 0 0 34px rgba(var(--mute-purple), 0.6); }
+    }
+
+    /* #endregion */
+
+    /* #region Screen 2: 메인 큐레이션 룸 */
+    /* ---------- Screen 2: 메인 큐레이션 룸 ---------- */
+    #main-app {
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 14px 24px 24px;
+      background: #f4efe8;
+      color: #3d3540;
+      opacity: 0;
+      transition: opacity var(--fade-time) ease;
+    }
+
+    #main-app.fade-in {
+      opacity: 1;
+    }
+
+    nav > div {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    nav > div > span {
+      min-width: 56px;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      opacity: 0.6;
+    }
+
+    #brand-filter {
+      flex-wrap: nowrap;
+    }
+
+    #brand-list {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 8px 0;
+      flex: 1;
+      min-width: 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE, Edge */
+    }
+
+    /* 접힌 상태에서는 앞의 8개만 */
+    #brand-list.is-collapsed .brand-extra {
+      display: none;
+    }
+
+    /* [+ 더보기 / 접기] 토글: 칩보다 가벼운 텍스트 버튼 */
+    #brand-filter #brand-toggle {
+      align-self: flex-start;
+      min-height: 0;
+      margin-top: 2px;
+      padding: 4px 6px;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      color: #6b5878;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+    #brand-filter #brand-toggle:hover {
+      background: rgba(176, 150, 196, 0.15);
+    }
+    #brand-toggle[hidden] {
+      display: none;
+    }
+
+    #brand-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    #brand-list button {
+      flex-shrink: 0;
+    }
+
+    nav button,
+    #category-tabs button,
+    #action-buttons button {
+      padding: 6px 14px;
+      border: 1px solid #cbbfc9;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    nav button:hover,
+    #category-tabs button:hover,
+    #action-buttons button:hover {
+      background: rgba(176, 150, 196, 0.15);
+    }
+
+    #category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* 필터 버튼(MOOD/BRAND/TONE/CATEGORY) 모양 통일: 같은 알약 모양·패딩·글자 크기 */
+    nav button,
+    #category-tabs button {
+      box-sizing: border-box;
+      min-height: 34px;
+      padding: 7px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    /* 선택된 버튼: 공통 딥 차콜브라운 배경 + 아이보리 글자 (모양은 위와 동일하게 유지) */
+    #mood-filter button.active,
+    #brand-list button.active,
+    #tone-filter button.active,
+    #category-tabs button.active,
+    #mood-filter button.active:hover,
+    #brand-list button.active:hover,
+    #tone-filter button.active:hover,
+    #category-tabs button.active:hover {
+      border-color: #3a302e;
+      background: #3a302e;
+      color: #f6efe3;
+    }
+
+    main {
+      display: grid;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 900px) {
+      main {
+        grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+        align-items: start;
+      }
+
+      #layering-board {
+        position: sticky;
+        top: 64px;
+      }
+
+      /* 넓은 화면: MOOD / BRAND / TONE 필터를 왼쪽 세로 사이드바로 */
+      #main-app:not([hidden]) {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        column-gap: 28px;
+      }
+
+      #main-app > * { grid-column: 2; }
+
+      #main-app > header,
+      #main-app > #curated-result,
+      #main-app > footer { grid-column: 1 / -1; }
+
+      #main-app > nav {
+        grid-column: 1;
+        align-self: start;
+        position: sticky;
+        top: 64px;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        margin-top: 8px;
+        /* 휠 스크롤은 그대로, 스크롤바 UI만 숨김 */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE, Edge */
+      }
+
+      #main-app > nav::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+
+      nav > div,
+      #brand-filter {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 6px;
+        margin: 0 0 22px;
+      }
+
+      nav > div > span {
+        margin-bottom: 2px;
+      }
+
+      nav button {
+        text-align: left;
+      }
+
+      #brand-list {
+        flex-direction: column;
+        overflow-x: visible;
+        white-space: normal;
+        padding: 0;
+        gap: 6px; /* 브랜드 버튼 사이 세로 간격 */
+      }
+
+      #brand-list button {
+        margin: 0;
+      }
+    }
+
+    #item-count {
+      margin: 8px 0 12px;
+      font-size: 13px;
+      opacity: 0.6;
+    }
+
+    /* 퀴즈 취향 줄 + 카드 MATCH 뱃지 */
+    #for-you-bar[hidden] { display: none; }
+    #for-you-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin: 0 0 4px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+    }
+    #for-you-bar .fy-label {
+      font-weight: 700;
+      letter-spacing: 0.14em;
+    }
+    #fy-picks { opacity: 0.7; }
+    #for-you-bar button {
+      padding: 4px 12px;
+      border: 1px solid #cbbfc9;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    #for-you-bar button:hover { background: rgba(176, 150, 196, 0.15); }
+    #for-you-bar button.active {
+      border-color: #3a302e;
+      background: #3a302e;
+      color: #f6efe3;
+    }
+    .fy-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(58, 48, 46, 0.85);
+      color: #f6efe3;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+    }
+
+    /* 옷 카드 그리드 & 정돈된 이미지 박스 */
+    #item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 16px;
+    }
+
+    .item-card {
+      overflow: hidden;
+      border: 1px solid #e4dbe0;
+      border-radius: 10px;
+      background: #fbf8f4;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card:hover,
+    .item-card:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(90, 70, 100, 0.14);
+      outline: none;
+    }
+
+    /* 지금 코디 캔버스에 올라가 있는 아이템: 은은한 라벤더 테두리 + 옅은 그림자 */
+    .item-card {
+      position: relative;
+    }
+    .item-card.is-selected {
+      border-color: transparent;
+      outline: 1.5px solid #2b2b2b;
+      outline-offset: -1.5px;
+      box-shadow: 0 6px 18px rgba(43, 43, 43, 0.12);
+    }
+
+    .item-img-wrap {
+      position: relative;
+      /* 크게 키운 상품 이미지가 아래 글자 영역을 덮지 않게 */
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      box-sizing: border-box;
+      border-bottom: 1px solid #efe8ec;
+    }
+
+    .item-card img {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+    }
+
+    /* 카드 크기 통일: 흰 여백을 뺀 실제 옷이 카드의 같은 비율(기준: COYSEIO TONE-MIX 자켓)을 채우게
+       cardImageStyle()이 위치·크기를 넣어줌 */
+    .item-card img.is-fit {
+      inset: auto;
+      margin: 0;
+      height: auto;
+      max-width: none;
+      object-fit: fill;
+    }
+
+    .item-info {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      /* 카드 남은 높이를 채워서, 아래 SHOP 링크가 모든 카드에서 같은 바닥 라인에 오게 */
+      flex: 1;
+    }
+
+    .item-brand {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .item-name {
+      margin: 2px 0;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    /* 상품명 끝의 [색상]은 한 줄 띄워서 따로 */
+    /* 색상: 대괄호 텍스트 대신 빈티지 캡슐 뱃지 */
+    .item-color {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 6px 0 4px;
+    }
+    .color-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid #e3d8cc;
+      border-radius: 999px;
+      background: #f1ebe2;
+      color: #6b5d55;
+      font-size: 10px;
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    /* 가격: 차분한 세리프 이탤릭, 모든 카드 "123,000원" 형식 */
+    .item-price {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-style: italic;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .item-shop {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: #6b5878;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      display: inline-block;
+      /* 상품명 길이와 상관없이 항상 카드 맨 아래에 붙음 */
+      margin-top: auto;
+    }
+
+    /* 룩보드: 사람이 입은 것처럼 배치하는 피팅 보드 */
+    #layering-board {
+      /* 스크롤해도 화면에 따라오게 (sticky도 안쪽 absolute의 기준이 됨) */
+      position: sticky;
+      top: 64px;
+      /* 화면 높이 안에 다 들어오도록 폭을 제한 */
+      width: min(100%, 425px, calc((100vh - 130px) * 2 / 3));
+      margin: 0 auto;
+      aspect-ratio: 2 / 3;
+      /* 플랫레이 룩북: 은은한 크림 종이 + 얇은 테두리 */
+      border: 1px solid #e6dccf;
+      border-radius: 16px;
+      background:
+        radial-gradient(120% 90% at 50% 0%, #fffdf9 0%, #faf5ee 55%, #f3ece2 100%);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 8px 24px rgba(90, 70, 60, 0.06);
+      overflow: hidden;
+    }
+
+    /* 옷이 하나라도 들어가면 빈 슬롯 안내 문구(Select ...)도 전부 숨김 */
+    .slot-empty {
+      transition: opacity 0.4s ease;
+    }
+
+    /* 빈 슬롯: 네모 테두리 없이 짧은 글자만 가운데에 */
+    .slot-empty:not([hidden]) {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #layering-board:has(.slot.is-filled) .slot-empty {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .slot {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* 플랫레이 배치: HEADWEAR → TOP → BOTTOM 을 한 줄(--axis)로 맞물리게 쌓고,
+       가방은 오른쪽 아래에 살짝 기울여 툭 놓인 느낌으로 */
+    /* 상의·하의·모자는 중심선(--axis)에 세로로 모이고, 가방은 하의 오른쪽 아래 여백에 기울여 놓음.
+       가방 슬롯은 캔버스 오른쪽 벽에서 8% 띄움 */
+    #layering-board { --axis: 40%; }
+    #slot-headwear { left: calc(var(--axis) - 13%); top: 2.5%; width: 26%; height: 13%; z-index: 4; }
+    #slot-top      { left: calc(var(--axis) - 25%); top: 18%;  width: 50%; height: 29%; z-index: 2; }
+    #slot-bottom   { left: calc(var(--axis) - 26%); top: 48.5%; width: 52%; height: 49.5%; z-index: 1; }
+    #slot-bag      { left: 66%; top: 57%;  width: 25%; height: 24%; z-index: 3; }
+    #slot-bag .slot-filled { transform: rotate(-7deg); transform-origin: 50% 60%; }
+
+    /* 빈 상태 글자: 모자→상의→하의가 같은 중심선에 비슷한 간격(약 9% / 32% / 58%)으로 모이게,
+       하의 글자는 슬롯 위쪽(허리 근처)에, 가방 글자는 하의 글자 오른쪽 아래에 */
+    #slot-bottom .slot-empty:not([hidden]) { inset: 0 0 auto 0; height: 40%; }
+    #slot-bag .slot-empty:not([hidden]) { inset: 0 0 auto 0; height: 50%; }
+
+    .slot-empty {
+      padding: 6px;
+    }
+
+    .slot-empty[hidden],
+    .slot-filled[hidden] {
+      display: none;
+    }
+
+    /* 빈 슬롯 안내 문구: 마네킹 선 위에서도 또렷하게 (흰 글로우 + 진한 플럼색) */
+    .slot-guide {
+      margin: 0 0 4px;
+      font-size: 11px;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.18em;
+      color: rgba(74, 58, 82, 0.55);
+      text-shadow:
+        0 1px 4px rgba(255, 255, 255, 0.8),
+        0 0 2px rgba(255, 255, 255, 0.9);
+    }
+
+    .slot-mood {
+      margin: 0;
+      font-size: 10px;
+      font-style: italic;
+      color: #6e5d74;
+      opacity: 0.85;
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
+    }
+
+    .slot-filled {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: default;   /* 옷을 눌러도 안 빠짐 — 오른쪽 위 × 로만 빼기 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* images_cut/ 의 배경 없는(투명) 이미지를 쓰고, 흰 옷도 떠 보이게 옅은 그림자 */
+      filter: drop-shadow(0 2px 3px rgba(70, 50, 70, 0.18));
+      animation: fit-in 0.5s ease;
+    }
+
+    /* 투명 이미지가 없어 원본(흰 배경)으로 대체된 경우에만 흰 배경을 multiply로 지움 */
+    .slot.no-cut {
+      mix-blend-mode: multiply;
+    }
+    .slot.no-cut .slot-img {
+      filter: none;
+    }
+
+    /* 모자는 머리 위에, 상의는 어깨에서, 하의는 허리에서 시작 */
+    /* 모자는 슬롯 높이(contain)가 아니라 머리통 너비 기준으로 크기를 잡고,
+       긴 끈은 슬롯 밖으로 흘러 상의 앞에 떨어지게.
+       --hat-w / --hat-left / --hat-top 은 layoutHeadwear()가 모자 실제 영역에 맞춰 넣어줌 */
+    #slot-headwear {
+      overflow: visible !important;
+      z-index: 10 !important;
+    }
+    #slot-headwear .slot-filled { overflow: visible !important; }
+    #slot-headwear .slot-img {
+      position: absolute;
+      left: var(--hat-left, 5%);
+      top: var(--hat-top, 0px);
+      width: var(--hat-w, 90%) !important;
+      height: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: fill !important;
+    }
+
+    /* 상의·하의도 흰 여백을 뺀 실제 옷 크기 기준으로 통일 (layoutClothes()가 --img-* 값을 넣어줌) */
+    #slot-top .slot-img.is-fit,
+    #slot-bottom .slot-img.is-fit,
+    #slot-bag .slot-img.is-fit {
+      position: absolute;
+      left: var(--img-left);
+      top: var(--img-top);
+      width: var(--img-w) !important;
+      height: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: fill !important;
+    }
+    #slot-top .slot-img,
+    #slot-bottom .slot-img   { object-position: center top; }
+
+    @keyframes fit-in {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .slot-caption {
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      transform: translateX(-50%);
+      max-width: 180px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(40, 30, 45, 0.8);
+      color: #fff;
+      font-size: 11px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .slot-filled:hover .slot-caption,
+    .slot-filled:focus-visible .slot-caption {
+      opacity: 1;
+    }
+
+    #action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 12px;
+      opacity: 0.7;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* 상단 타이틀: 한 줄로 얇게 */
+    /* 상단바: 스크롤해도 화면 맨 위에 계속 떠 있음 (MUSH ROOM 를 누르면 맨 위로) */
+    #main-app > header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 14px;
+      margin: -14px -24px 8px;
+      padding: 12px 24px 10px;
+      background: rgba(244, 239, 232, 0.94);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    #main-app > header.is-scrolled {
+      border-bottom-color: #e6dccf;
+      box-shadow: 0 4px 14px rgba(60, 45, 40, 0.06);
+    }
+    #home-link {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #home-link:hover { opacity: 0.75; }
+
+    #main-app > header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+    }
+    #main-app > header p {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    /* YOUR CURATED CLOSET: 슬림한 띠 배너 (타이틀 · 퀴즈 결과 · SHOP 링크 한 줄) */
+    #curated-result {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 8px;
+      padding: 7px 10px 7px 18px;
+      border: 1px solid #e3d9df;
+      border-radius: 999px;
+      background: #fdfbf9;
+    }
+    .curated-title {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      white-space: nowrap;
+    }
+    #result-list {
+      display: flex;
+      flex: 1;
+      flex-wrap: wrap;
+      gap: 2px 16px;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 12px;
+      opacity: 0.75;
+    }
+    #result-list li {
+      white-space: nowrap;
+    }
+
+    #shop-link {
+      display: inline-block;
+      flex-shrink: 0;
+      margin-top: 0;
+      padding: 6px 16px;
+      white-space: nowrap;
+      border: 1px solid #8f7f9c;
+      border-radius: 999px;
+      color: #4a3f54;
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      font-size: 13px;
+    }
+
+    /* #endregion */
+
+    /* #region 개발용 치트키 버튼 */
+    /* 개발용 치트키 플로팅 버튼 */
+    #dev-skip-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999999;
+      background: #3e3245;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    /* #endregion */
+
+    /* #region 마우스 하트 트레일 */
+    .cursor-heart {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 1000000;
+      line-height: 1;
+      user-select: none;
+      /* 은빛 테두리 + 하얀 빛번짐으로 밝은 배경에서도 보이게 */
+      text-shadow:
+        0 0 1px rgba(110, 110, 125, 0.9),
+        0 0 6px rgba(255, 255, 255, 0.95),
+        0 0 12px rgba(220, 225, 235, 0.8);
+      animation: heart-pop 0.9s ease-out forwards;
+    }
+
+    @keyframes heart-pop {
+      0%   { opacity: 1;   transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+      30%  { opacity: 1;   transform: translate(calc(-50% + var(--dx) * 0.4), calc(-50% + var(--dy) * 0.4)) scale(1.1) rotate(var(--rot)); }
+      /* 반짝반짝 깜빡임 */
+      45%  { opacity: 0.35; }
+      60%  { opacity: 1; }
+      75%  { opacity: 0.4; }
+      100% { opacity: 0;   transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 30px)) scale(0.6) rotate(var(--rot)); }
+    }
+    /* #endregion */
+
+    /* #region 페이퍼돌(종이 인형 옷입히기) 빈티지 효과 */
+    /* 코디북 바탕: 크림 종이 + 아주 옅은 종이결 */
+    #layering-board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.38  0 0 0 0 0.3  0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* 옷마다 살짝 삐뚤게 (각도는 wearItem()이 아이템마다 --tilt 로 넣어줌) */
+    .slot-filled {
+      transform: rotate(var(--tilt, 0deg));
+      transform-origin: 50% 30%;
+      transition: transform 0.35s ease;
+    }
+    #slot-bag .slot-filled {
+      transform: rotate(calc(-7deg + var(--tilt, 0deg)));
+    }
+
+    /* 가위로 오린 종이처럼: 흰 테두리 + 종이 그림자 + 살짝 바랜 색감 */
+    .slot-img {
+      filter:
+        sepia(0.08) saturate(0.94)
+        drop-shadow(1.5px 0 0 #fffdf8)
+        drop-shadow(-1.5px 0 0 #fffdf8)
+        drop-shadow(0 1.5px 0 #fffdf8)
+        drop-shadow(0 -1.5px 0 #fffdf8)
+        drop-shadow(1px 3px 3px rgba(70, 50, 40, 0.22));
+    }
+    /* #endregion */
+
+    /* 코디북 오른쪽 위 전체 비우기 버튼: 빈티지 옷 단추 모양 (구멍 4개 + 실이 × 로 꿰매진 모양) */
+    #board-clear-btn[hidden] { display: none; }
+    #board-clear-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 60;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      font-size: 0;            /* × 글자는 숨기고 단추 그림으로 */
+      cursor: pointer;
+      /* 무광 빈티지: 바랜 모카 로즈 + 얼룩진 결, 광택 없음 */
+      background:
+        radial-gradient(circle at 37% 37%, #4f3f39 0 2px, transparent 2.5px),
+        radial-gradient(circle at 63% 37%, #4f3f39 0 2px, transparent 2.5px),
+        radial-gradient(circle at 37% 63%, #4f3f39 0 2px, transparent 2.5px),
+        radial-gradient(circle at 63% 63%, #4f3f39 0 2px, transparent 2.5px),
+        radial-gradient(circle at 70% 75%, rgba(90, 66, 56, 0.18), transparent 55%),
+        radial-gradient(circle at 25% 30%, rgba(90, 66, 56, 0.12), transparent 50%),
+        #a98f84;
+      box-shadow:
+        inset 0 0 0 3px #a98f84,
+        inset 0 0 0 4px rgba(79, 63, 57, 0.4),
+        0 1px 2px rgba(60, 45, 40, 0.3);
+      animation: button-pop 0.35s ease;
+      transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1), box-shadow 0.3s ease, filter 0.3s ease;
+    }
+    /* 단추 구멍을 지나는 아이보리 실 (× 모양) */
+    #board-clear-btn::before,
+    #board-clear-btn::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 13px;
+      height: 1.6px;
+      border-radius: 1px;
+      background: #e6d9c4;   /* 오래된 면실 색 */
+      box-shadow: none;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    #board-clear-btn::after { transform: translate(-50%, -50%) rotate(-45deg); }
+    #board-clear-btn:hover,
+    #board-clear-btn:focus-visible {
+      transform: rotate(90deg) scale(1.08);
+      filter: brightness(0.92);
+      outline: none;
+    }
+    #board-clear-btn:active { transform: rotate(90deg) scale(0.95); }
+    @keyframes button-pop {
+      from { opacity: 0; transform: scale(0.6) rotate(-60deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    /* 코디북 오른쪽 아래 [save me!] 저장 버튼 */
+    #save-me-btn[hidden] { display: none; }
+    #save-me-btn {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      z-index: 60;
+      padding: 9px 20px;
+      border: 1px solid #3a302e;
+      border-radius: 999px;
+      background: #3a302e;
+      color: #f6efe3;
+      font-size: 15px;
+      font-family: inherit;
+      font-style: italic;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(58, 48, 46, 0.22);
+      transform: rotate(-3deg);
+      animation: save-me-in 0.35s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #save-me-btn:hover,
+    #save-me-btn:focus-visible {
+      transform: rotate(0deg) translateY(-2px);
+      box-shadow: 0 10px 22px rgba(58, 48, 46, 0.28);
+    }
+    @keyframes save-me-in {
+      from { opacity: 0; transform: rotate(-3deg) translateY(8px); }
+      to { opacity: 1; transform: rotate(-3deg); }
+    }
+
+    /* #region 코디북 아이템 개별 삭제 (x) */
+    /* 슬롯 안의 x 는 위치 기준점으로만 쓰고 숨김. 실제 버튼은 #remove-layer (맨 앞) */
+    .slot-remove { visibility: hidden; }
+    #remove-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .board-remove {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      background: rgba(58, 48, 46, 0.85);
+      color: #f6efe3;
+      font-size: 14px;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      opacity: 0.75;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .board-remove:hover,
+    .board-remove:focus-visible {
+      opacity: 1;
+      transform: scale(1.12);
+    }
+    .board-remove[hidden] { display: none; }
+    .slot-remove {
+      position: absolute;
+      left: var(--rm-x, calc(100% - 22px));
+      top: var(--rm-y, 0px);
+      z-index: 5;
+      width: 22px;
+      height: 22px;
+      margin: -8px 0 0 -12px;
+      border-radius: 50%;
+      background: rgba(58, 48, 46, 0.82);
+      color: #f6efe3;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      opacity: 0.55;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .slot-filled:hover .slot-remove,
+    .slot-filled:focus-visible .slot-remove {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    /* #endregion */
+
+    /* #region 하단 버튼 줄: 합계 + 버튼 */
+    #action-buttons {
+      align-items: center;
+    }
+    #look-total {
+      margin: 0 auto 0 0;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      opacity: 0.75;
+    }
+    #look-total strong {
+      font-size: 15px;
+      letter-spacing: 0.04em;
+    }
+    /* #endregion */
+
+    /* 개발용 건너뛰기 버튼은 옷장 화면에서는 숨김 (코디북을 가리지 않게) */
+    body:has(#main-app:not([hidden])) #dev-skip-button {
+      display: none;
+    }
+
+    /* #region 토스트 안내 */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      z-index: 1000001;
+      max-width: min(92vw, 460px);
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: rgba(58, 48, 46, 0.92);
+      color: #f6efe3;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    /* #endregion */
+
+    /* #region 공통 모달 (룩북 아카이브 · 로그인) */
+    .modal[hidden] { display: none; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(40, 32, 30, 0.42);
+      backdrop-filter: blur(3px);
+    }
+    .modal-card {
+      position: relative;
+      width: min(100%, 760px);
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      padding: 26px 28px 24px;
+      border: 1px solid #e6dccf;
+      border-radius: 18px;
+      background: #fbf7f1;
+      color: #3d3540;
+      box-shadow: 0 20px 60px rgba(40, 30, 25, 0.25);
+    }
+    .modal-card.is-small { width: min(100%, 400px); }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: inherit;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-close:hover { background: rgba(176, 150, 196, 0.15); }
+    .modal-title {
+      margin: 0 0 2px;
+      font-size: 20px;
+      letter-spacing: 0.1em;
+    }
+    .modal-sub {
+      margin: 0 0 18px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      opacity: 0.6;
+    }
+    .modal-btn {
+      padding: 8px 16px;
+      border: 1px solid #cbbfc9;
+      border-radius: 18px;
+      background: transparent;
+      color: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .modal-btn:hover { background: rgba(176, 150, 196, 0.15); }
+    .modal-btn.is-primary {
+      border-color: #3a302e;
+      background: #3a302e;
+      color: #f6efe3;
+    }
+    .modal-btn.is-small {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+    .modal-btn.is-danger { color: #a0463f; border-color: #e3c4bf; }
+    /* #endregion */
+
+    /* #region 룩북 아카이브 모달 내용 */
+    .look-current {
+      display: grid;
+      grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 620px) {
+      .look-current { grid-template-columns: 1fr; }
+    }
+    .look-thumb {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      border: 1px solid #e6dccf;
+      border-radius: 12px;
+      background: #fffdf9;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .look-thumb img.look-snapshot {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    /* 캔버스 저장이 막힌 경우: 아이템 사진 모음으로 대신 보여줌 */
+    .look-collage {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .look-collage img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+    }
+    .look-items {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .look-items li {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e3d9df;
+    }
+    .look-items img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 8px;
+      mix-blend-mode: multiply;
+    }
+    .look-items .li-cat {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      opacity: 0.55;
+    }
+    .look-items .li-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .look-items .li-price {
+      display: block;
+      font-size: 12px;
+      opacity: 0.75;
+    }
+    .look-total-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 12px 0 14px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+    }
+    .look-total-line strong {
+      font-size: 18px;
+      letter-spacing: 0.04em;
+    }
+    .look-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .archive-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 26px 0 10px;
+      padding-top: 18px;
+      border-top: 1px solid #e6dccf;
+    }
+    .archive-head h3 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.16em;
+    }
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .archive-card {
+      position: relative;
+      border: 1px solid #e6dccf;
+      border-radius: 12px;
+      background: #fffdf9;
+      padding: 8px;
+    }
+    .archive-card .look-thumb { aspect-ratio: 2 / 3; border: none; }
+    .archive-card p {
+      margin: 6px 2px 0;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+    }
+    .archive-card .ac-total { opacity: 0.7; }
+    .archive-card .ac-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    #saved-looks-btn .saved-count {
+      display: inline-block;
+      min-width: 18px;
+      margin-left: 4px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #3a302e;
+      color: #f6efe3;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+    }
+    .archive-card .ac-buttons { flex-wrap: wrap; }
+    .archive-card .ac-buttons .modal-btn { flex: 1 1 auto; text-align: center; }
+
+    .archive-del {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 2;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(58, 48, 46, 0.78);
+      color: #f6efe3;
+      font-size: 14px;
+      line-height: 24px;
+      cursor: pointer;
+    }
+    .archive-empty {
+      font-size: 13px;
+      opacity: 0.6;
+    }
+    /* #endregion */
+
+    /* #region 로그인 · 회원가입 · 비밀번호 찾기 */
+    #auth-area {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+    #auth-area .auth-hello { opacity: 0.75; }
+    .auth-tabs {
+      display: flex;
+      gap: 6px;
+      margin: 0 0 16px;
+    }
+    .auth-tabs button {
+      flex: 1;
+      padding: 7px 0;
+      border: 1px solid #cbbfc9;
+      border-radius: 18px;
+      background: transparent;
+      color: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .auth-tabs button.active {
+      border-color: #3a302e;
+      background: #3a302e;
+      color: #f6efe3;
+    }
+    .auth-form[hidden] { display: none; }
+    .auth-form label {
+      display: block;
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+    .auth-form input,
+    .auth-form select {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 4px;
+      padding: 9px 12px;
+      border: 1px solid #d9ccd6;
+      border-radius: 10px;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+      font-size: 14px;
+    }
+    .auth-form .modal-btn { width: 100%; margin-top: 6px; padding: 10px 0; }
+    .auth-msg {
+      min-height: 18px;
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: #a0463f;
+    }
+    .auth-msg.is-ok { color: #4f6b4a; }
+    .auth-note {
+      margin: 14px 0 0;
+      font-size: 11px;
+      line-height: 1.5;
+      opacity: 0.55;
+    }
+    /* #endregion */
+
+    /* #region 하이엔드 인디 룩북 스타일 (세리프 타이포 · 오트밀 배경 · 에디토리얼 캔버스) */
+    :root {
+      --lb-serif: 'Playfair Display', 'Song Myung', Georgia, serif;
+      --lb-ink: #2b2b2b;
+      --lb-mute: #8a7f78;
+      --lb-paper: #fbf7f2;
+      --lb-line: #e2d8cc;
+    }
+
+    /* 전체 배경: 따뜻하고 차분한 오트밀/크림 */
+    body,
+    #main-app {
+      background-color: var(--lb-paper);
+    }
+    #main-app {
+      color: var(--lb-ink);
+    }
+    #main-app > header {
+      background: rgba(251, 247, 242, 0.94);
+    }
+    #main-app > header.is-scrolled {
+      border-bottom-color: var(--lb-line);
+    }
+
+    /* 상단 로고: 굵고 깔끔한 고딕, 다크 차콜 */
+    #main-app > header h1 {
+      font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', Arial, sans-serif;
+      font-style: normal;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: 0.06em;
+      color: var(--lb-ink);
+    }
+    #home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7em;
+    }
+    /* 양옆 ✦: 아주 작고 흐리게 */
+    #main-app > header .logo-mark {
+      font-style: normal;
+      font-size: 0.38em;
+      letter-spacing: 0;
+      color: var(--lb-mute);
+      opacity: 0.7;
+      transform: translateY(-0.1em);
+    }
+    /* 서브 텍스트: 작은 이탤릭 세리프, 뮤트 톤으로 배경에 은은하게 */
+    #main-app > header p {
+      font-family: var(--lb-serif);
+      font-style: italic;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: #a39890;
+      opacity: 1;
+    }
+
+    /* 상품 카드: 얇은 라인 + 은은한 호버 (사진은 아주 살짝 확대, 그림자는 조금 깊게) */
+    .item-card {
+      border-color: #ece4da;
+      border-radius: 6px;
+      background: #fffdfa;
+      transition: transform 0.45s ease, box-shadow 0.45s ease, border-color 0.45s ease;
+    }
+    .item-card:hover,
+    .item-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--lb-line);
+      box-shadow: 0 12px 28px rgba(43, 43, 43, 0.09);
+    }
+    .item-img-wrap {
+      border-bottom-color: #f1ebe3;
+    }
+    .item-card img {
+      transform-origin: 50% 50%;
+      transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .item-card:hover img,
+    .item-card:focus-visible img {
+      transform: scale(1.035);
+    }
+
+    /* 브랜드 · 상품명 · 가격: 세리프 통일, 빈티지 다크 차콜 / 뮤트 톤 */
+    .item-brand {
+      font-family: var(--lb-serif);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--lb-mute);
+      opacity: 1;
+    }
+    .item-name {
+      font-family: var(--lb-serif);
+      font-size: 13.5px;
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--lb-ink);
+    }
+    .item-price {
+      font-family: var(--lb-serif);
+      font-style: italic;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      color: var(--lb-ink);
+    }
+    .item-shop {
+      font-family: var(--lb-serif);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      color: var(--lb-mute);
+    }
+    .item-shop:hover { color: var(--lb-ink); }
+
+    /* 컬러 칩: 동글동글한 미니 캡슐 라벨 (연한 베이지) */
+    .item-color {
+      gap: 4px;
+      margin: 4px 0 2px;
+    }
+    .color-chip {
+      padding: 2px 9px;
+      border: none;
+      border-radius: 999px;
+      background: #f2ebe1;
+      color: #7a6d63;
+      font-family: var(--lb-serif);
+      font-size: 9.5px;
+      font-weight: 500;
+      line-height: 1.6;
+      letter-spacing: 0.12em;
+    }
+
+    /* 코디 캔버스: 매거진 페이지처럼 얇은 테두리 + 안쪽 여백 라인 */
+    #layering-board {
+      border: 1px solid #d9cfc3;
+      border-radius: 2px;
+      background: #fdfaf5;
+      box-shadow:
+        inset 0 0 0 12px #fdfaf5,
+        inset 0 0 0 13px rgba(43, 43, 43, 0.08),
+        0 1px 2px rgba(43, 43, 43, 0.04);
+    }
+    /* #endregion */
+
+    /* 로그인 폼의 '비밀번호를 잊으셨나요?' 링크 */
+    .auth-link {
+      display: block;
+      margin: 12px auto 0;
+      padding: 2px 0;
+      border: none;
+      border-bottom: 1px solid transparent;
+      background: none;
+      color: #6b5878;
+            font-size: 12.5px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    .auth-link:hover,
+    .auth-link:focus-visible {
+      color: #3a302e;
+      border-bottom-color: #3a302e;
+      outline: none;
+    }
+
+    /* #region 마무리 디테일: 빈 화면 · 호버 · 모바일 반응형 */
+    /* 보관함이 비어 있으면 [전체 삭제] 숨김 (.modal-btn 의 display 가 hidden 을 덮어써서 따로 지정) */
+    #archive-clear[hidden] { display: none; }
+
+    /* 빈 화면 안내 (상품 목록 · 보관함) */
+    .empty-state[hidden] { display: none; }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin: 28px auto;
+      padding: 40px 24px 34px;
+      max-width: 440px;
+      border: 1px dashed #dccfc1;
+      border-radius: 6px;
+      background: rgba(255, 253, 249, 0.7);
+      text-align: center;
+      color: #2b2b2b;
+    }
+    .empty-state.is-archive { grid-column: 1 / -1; margin: 6px auto; }
+    .empty-mark {
+      font-size: 18px;
+      color: #b8959b;
+      animation: empty-twinkle 2.8s ease-in-out infinite;
+    }
+    @keyframes empty-twinkle {
+      0%, 100% { opacity: 0.45; transform: scale(0.9) rotate(0deg); }
+      50%      { opacity: 1;    transform: scale(1.1) rotate(45deg); }
+    }
+    .empty-title {
+      margin: 4px 0 0;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-size: 17px;
+    }
+    .empty-text {
+      margin: 0 0 12px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #8a7f78;
+    }
+    .empty-btn {
+      padding: 8px 18px;
+      border: 1px solid #2b2b2b;
+      border-radius: 999px;
+      background: transparent;
+      color: #2b2b2b;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .empty-btn:hover,
+    .empty-btn:focus-visible { background: #2b2b2b; color: #fbf7f2; outline: none; }
+
+    /* 코디북이 비어 있을 때 안내 */
+    #board-hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 22px;
+      z-index: 5;
+      margin: 0;
+      text-align: center;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+      color: #a39890;
+      pointer-events: none;
+      animation: board-hint-breathe 3.2s ease-in-out infinite;
+    }
+    #board-hint[hidden] { display: none; }
+    @keyframes board-hint-breathe {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 1; }
+    }
+
+    /* 호버 · 누름 인터랙션 */
+    .item-card:active { transform: translateY(0) scale(0.985); }
+    .archive-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .archive-card:hover {
+      transform: translateY(-3px);
+      border-color: #d9cfc3;
+      box-shadow: 0 12px 26px rgba(43, 43, 43, 0.1);
+    }
+    .look-items li { transition: background 0.25s ease; border-radius: 8px; }
+    .look-items li:hover { background: rgba(242, 235, 225, 0.6); }
+    .color-chip { transition: background 0.25s ease; }
+    .item-card:hover .color-chip { background: #eadfd2; }
+    #save-me-btn.is-saving,
+    #save-btn.is-saving { opacity: 0.6; cursor: progress; }
+    /* 키보드로 움직일 때 위치가 보이게 */
+    #main-app button:focus-visible,
+    .modal button:focus-visible,
+    .item-card:focus-visible {
+      outline: 2px solid #b8959b;
+      outline-offset: 2px;
+    }
+
+    /* 헤더: 긴 이메일은 말줄임 */
+    #auth-area { min-width: 0; }
+    #saved-looks-btn { white-space: nowrap; }
+    #auth-area .auth-user-btn {
+      max-width: min(46vw, 280px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 모바일 '코디북 보기' 버튼 (데스크톱에서는 코디북이 옆에 붙어 있어서 숨김) */
+    #board-jump {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 300;
+      transform: translateX(-50%);
+      padding: 11px 20px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(43, 43, 43, 0.92);
+      color: #fbf7f2;
+      font-family: inherit;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      box-shadow: 0 10px 24px rgba(43, 43, 43, 0.25);
+      cursor: pointer;
+    }
+    #board-jump span {
+      display: inline-block;
+      min-width: 18px;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #b8959b;
+      font-size: 11px;
+    }
+    #board-jump[hidden] { display: none; }
+    @media (min-width: 900px) {
+      #board-jump { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      #main-app { padding: 12px 14px 80px; }
+      #main-app > header { margin: -12px -14px 8px; padding: 10px 14px; }
+      #main-app > header h1 { font-size: 19px; }
+      #item-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .item-info { padding: 8px 10px 10px; }
+      .item-name { font-size: 12.5px; }
+      .item-price { font-size: 13px; }
+      .item-shop { font-size: 10px; letter-spacing: 0.1em; }
+      #layering-board { width: min(100%, 360px); }
+      .modal { padding: 12px; }
+      .modal-card { padding: 22px 18px 18px; }
+      .modal-title { padding-right: 34px; font-size: 17px; }
+      .archive-card .ac-buttons { flex-wrap: wrap; }
+      #toast { bottom: 80px; }
+    }
+    /* #endregion */
+
+    /* #region 보관함 빈 화면 문구 */
+    /* 보관함이 비었을 때 문구: 작고 굵게 */
+    .empty-state.is-archive .empty-title {
+      font-style: normal;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+    .empty-state.is-archive .empty-text {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #7a6f68;
+    }
+    /* #endregion */
+  </style>
+</head>
+<body>
+
+
+  <!-- #region Screen 1: 인트로 -->
+  <!-- Screen 1: 풀스크린 인트로 -->
+  <section id="intro-screen">
+    <!-- 화면 한가운데: 로고처럼 굵은 고딕 글자 버튼 -->
+    <div class="intro-cta">
+      <button type="button" id="enter-btn" class="logo-btn">OPEN THE DOOR!</button>
+    </div>
+  </section>
+  <!-- #endregion -->
+
+  <!-- #region Screen 1.5: 취향 질문 -->
+  <!-- Screen 1.5: 취향 질문 4단계 -->
+  <section id="quiz-screen" hidden>
+    <div class="quiz-inner">
+      <div class="quiz-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="quiz-progress">QUESTION <span id="quiz-step">1</span> / 3</p>
+
+      <div id="quiz-card">
+        <p class="quiz-label" id="quiz-label"></p>
+        <h2 class="quiz-question" id="quiz-question"></h2>
+        <p class="quiz-question-ko" id="quiz-question-ko"></p>
+        <div class="quiz-options" id="quiz-options"></div>
+      </div>
+
+      <button type="button" id="quiz-back" hidden>← back</button>
+      <button type="button" id="open-closet-btn" disabled>✦ OPEN MY CURATED CLOSET ✦</button>
+    </div>
+  </section>
+  <!-- #endregion -->
+
+  <!-- #region Screen 2: 메인 큐레이션 룸 -->
+  <!-- Screen 2: 메인 큐레이션 룸 -->
+  <div id="main-app" hidden>
+
+    <header>
+      <h1><a href="#" id="home-link" title="맨 위로"><span class="logo-mark" aria-hidden="true">✦</span>MUSH ROOM<span class="logo-mark" aria-hidden="true">✦</span></a></h1>
+      <div id="auth-area"></div>
+    </header>
+
+    <section id="curated-result">
+      <p class="curated-title">YOUR CURATED CLOSET</p>
+      <ul id="result-list"></ul>
+    </section>
+
+    <nav>
+      <!-- MOOD 필터 -->
+      <div id="mood-filter">
+        <span>MOOD</span>
+        <button type="button" data-mood="all" class="active">All</button>
+        <button type="button" data-mood="fairy-mori">Fairy &amp; Mori</button>
+        <button type="button" data-mood="deconstructed-cyber">Deconstructed &amp; Cyber</button>
+        <button type="button" data-mood="vintage-retro">Vintage &amp; Retro</button>
+        <button type="button" data-mood="subculture-acc">Subculture &amp; Acc</button>
+      </div>
+
+      <!-- BRAND 필터 -->
+      <div id="brand-filter">
+        <span>BRAND</span>
+        <div id="brand-list"></div>
+        <button type="button" id="brand-toggle" hidden>+ 더보기</button>
+      </div>
+
+    </nav>
+
+    <main>
+      <!-- 좌측 아이템 그리드 -->
+      <section id="item-selector">
+        <div id="category-tabs">
+          <button type="button" data-category="all" class="active">ALL</button>
+          <button type="button" data-category="headwear">HEADWEAR</button>
+          <button type="button" data-category="top">TOP</button>
+          <button type="button" data-category="bottom">BOTTOM</button>
+          <button type="button" data-category="bag">BAG</button>
+        </div>
+
+        <div id="for-you-bar" hidden>
+          <span class="fy-label">✦ FOR YOU</span>
+          <span id="fy-picks"></span>
+          <button type="button" id="fy-only">맞춤만 보기</button>
+          <button type="button" id="fy-clear" title="취향 정렬 끄기">취향 해제 ×</button>
+        </div>
+        <p id="item-count"></p>
+        <div id="item-grid"></div>
+        <div id="item-empty" class="empty-state" hidden>
+          <span class="empty-mark" aria-hidden="true">✦</span>
+          <p class="empty-title">이 조합의 옷은 아직 옷장에 없어요</p>
+          <p class="empty-text">무드나 브랜드를 바꿔 보거나, 필터를 처음으로 돌려 보세요</p>
+          <button type="button" class="empty-btn" id="reset-filters">필터 초기화</button>
+        </div>
+      </section>
+
+      <!-- 우측 룩보드 -->
+      <section id="layering-board">
+        <p id="board-hint" aria-live="polite">Tap a piece to start styling ✦</p>
+        <div class="slot" id="slot-headwear">
+          <div class="slot-empty">
+            <p class="slot-guide">headwear</p>
+          </div>
+          <button type="button" class="slot-filled" hidden tabindex="-1">
+            <span class="slot-remove" aria-hidden="true">×</span>
+            <img class="slot-img" alt="">
+            <span class="slot-caption"></span>
+          </button>
+        </div>
+
+        <div class="slot" id="slot-top">
+          <div class="slot-empty">
+            <p class="slot-guide">top</p>
+          </div>
+          <button type="button" class="slot-filled" hidden tabindex="-1">
+            <span class="slot-remove" aria-hidden="true">×</span>
+            <img class="slot-img" alt="">
+            <span class="slot-caption"></span>
+          </button>
+        </div>
+
+        <div class="slot" id="slot-bottom">
+          <div class="slot-empty">
+            <p class="slot-guide">bottom</p>
+          </div>
+          <button type="button" class="slot-filled" hidden tabindex="-1">
+            <span class="slot-remove" aria-hidden="true">×</span>
+            <img class="slot-img" alt="">
+            <span class="slot-caption"></span>
+          </button>
+        </div>
+
+        <div class="slot" id="slot-bag">
+          <div class="slot-empty">
+            <p class="slot-guide">bag</p>
+          </div>
+          <button type="button" class="slot-filled" hidden tabindex="-1">
+            <span class="slot-remove" aria-hidden="true">×</span>
+            <img class="slot-img" alt="">
+            <span class="slot-caption"></span>
+          </button>
+        </div>
+
+        <!-- 빼기(x) 버튼은 옷들 위 맨 앞 레이어에 따로 띄움 (모자·바지 등에 가려지지 않게) -->
+        <div id="remove-layer" aria-label="코디에서 빼기">
+          <button type="button" class="board-remove" data-cat="headwear" aria-label="모자 빼기" hidden>×</button>
+          <button type="button" class="board-remove" data-cat="top" aria-label="상의 빼기" hidden>×</button>
+          <button type="button" class="board-remove" data-cat="bottom" aria-label="하의 빼기" hidden>×</button>
+          <button type="button" class="board-remove" data-cat="bag" aria-label="가방 빼기" hidden>×</button>
+        </div>
+
+        <!-- 룩이 완성되면(모자·상의·하의 중 1개 이상) 코디북 오른쪽 아래에 저장 버튼 -->
+        <button type="button" id="save-me-btn" hidden>save me!</button>
+        <!-- 코디북 오른쪽 위: 올린 옷 전부 빼기 -->
+        <button type="button" id="board-clear-btn" hidden title="코디북 비우기" aria-label="코디북 비우기">×</button>
+      </section>
+    </main>
+
+    <!-- 모바일: 코디북이 목록 아래에 있어서, 바로 내려가는 버튼 -->
+    <button type="button" id="board-jump" hidden>✦ 코디북 보기 <span id="board-jump-count">0</span></button>
+
+    <div id="action-buttons">
+      <p id="look-total">TOTAL <strong id="look-total-value">0원</strong></p>
+      <button type="button" id="clear-btn">✦ CLEAR ARCHIVE</button>
+      <button type="button" id="archive-btn">MY ARCHIVE</button>
+      <button type="button" id="save-btn">SAVE MY MORI LOOK</button>
+    </div>
+
+    <footer>
+      <p class="footer-mood">✦ MUSH ROOM — A Dreamy Silhouette Room inspired by K-Designers</p>
+      <p class="disclaimer">
+        This is a non-commercial styling study project.
+        All product images, silhouettes, and brand trademarks belong to their original creators
+        (Coyseio, Sio, and featured indie designer brands).
+      </p>
+    </footer>
+
+  </div>
+  <!-- #endregion -->
+
+
+  <!-- #region 토스트 · 룩북 아카이브 모달 · 로그인 모달 -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal" id="lookbook-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="lookbook-title">
+      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
+      <h2 class="modal-title" id="lookbook-title">✦ MY ARCHIVE LOOKBOOK</h2>
+      <p class="modal-sub" id="lookbook-sub"></p>
+
+      <div id="look-current-wrap"></div>
+
+      <div class="archive-head">
+        <h3>SAVED ARCHIVES</h3>
+        <button type="button" class="modal-btn is-small is-danger" id="archive-clear">전체 삭제</button>
+      </div>
+      <div class="archive-grid" id="archive-grid"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="auth-modal" hidden>
+    <div class="modal-card is-small" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
+      <h2 class="modal-title" id="auth-title">✦ Member</h2>
+      <p class="modal-sub">로그인하면 내 룩북 아카이브가 계정별로 따로 저장돼요</p>
+
+      <div class="auth-tabs">
+        <button type="button" data-auth-tab="login" class="active">로그인</button>
+        <button type="button" data-auth-tab="signup">회원가입</button>
+        <button type="button" data-auth-tab="reset">비밀번호 재설정</button>
+      </div>
+
+      <form class="auth-form" data-form="login">
+        <label>이메일 <input type="email" name="email" autocomplete="email" required></label>
+        <label>비밀번호 <input type="password" name="password" autocomplete="current-password" required></label>
+        <button type="submit" class="modal-btn is-primary">로그인</button>
+        <button type="button" class="auth-link" id="forgot-link">비밀번호를 잊으셨나요?</button>
+        <p class="auth-msg"></p>
+      </form>
+
+      <form class="auth-form" data-form="signup" hidden>
+        <label>아이디 (이메일) <input type="email" name="email" autocomplete="email" required></label>
+        <label>닉네임 <input type="text" name="name" maxlength="20" autocomplete="nickname" required></label>
+        <label>비밀번호 (6자 이상) <input type="password" name="password" minlength="6" autocomplete="new-password" required></label>
+        <label>비밀번호 확인 <input type="password" name="password2" minlength="6" autocomplete="new-password" required></label>
+        <button type="submit" class="modal-btn is-primary">가입하기</button>
+        <p class="auth-msg"></p>
+      </form>
+
+      <p class="auth-note">※ 계정은 Supabase 로 관리돼요. 로그인한 상태에서 저장한 룩은 내 계정(saved_looks)에도 함께 저장돼요.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="reset-modal" hidden>
+    <div class="modal-card is-small" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
+      <h2 class="modal-title" id="reset-title">Password Reset</h2>
+      <p class="modal-sub" id="reset-sub">가입한 이메일로 재설정 링크를 보내드려요</p>
+
+      <!-- 1단계: 재설정 메일 요청 -->
+      <form class="auth-form" data-reset="request">
+        <label>이메일 <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required></label>
+        <button type="submit" class="modal-btn is-primary">재설정 메일 보내기</button>
+        <p class="auth-msg"></p>
+        <button type="button" class="auth-link" id="back-to-login">← 로그인으로 돌아가기</button>
+      </form>
+
+      <!-- 2단계: 메일 링크로 돌아오면 새 비밀번호 입력 -->
+      <form class="auth-form" data-reset="update" hidden>
+        <label>새 비밀번호 (6자 이상) <input type="password" name="password" minlength="6" autocomplete="new-password" required></label>
+        <label>새 비밀번호 확인 <input type="password" name="password2" minlength="6" autocomplete="new-password" required></label>
+        <button type="submit" class="modal-btn is-primary">비밀번호 변경하기</button>
+        <p class="auth-msg"></p>
+      </form>
+    </div>
+  </div>
+  <!-- #endregion -->
+
+  <!-- ★ 중요: products.js 불러오기 ★ -->
+  <script src="products.js"></script>
+  <script src="image-boxes.js"></script>
+  <script src="card-boxes.js"></script>
+
+  <script>
+    // #region 데이터 & 필터 상태
+    // 1. 브랜드 목록
+    const brandsByMood = {
+      'fairy-mori': ['Coyseio', 'Sio', 'Miseki Seoul', 'Dry Rose', 'Nasty Fancy Club', 'Kijun'],
+      'deconstructed-cyber': ['Ojos', 'Open YY', 'Andersson Bell', 'Pain or Pleasure', '2000Archives'],
+      'vintage-retro': ['Matin Kim', 'Typeservice', 'Rest & Recreation', 'Sculptor', 'Threetimes', 'Sinoon', 'The Barnnet', 'Glowny', 'Raive', 'Diagonal'],
+      'subculture-acc': ['YIE YIE', 'Margesherwood', 'Stand Oil', 'OSOI']
+    };
+
+    // 2. 필터 상태 관리
+    let selectedMood = 'all';
+    let selectedBrand = 'all';
+    let selectedTone = 'all';
+    let selectedCategory = 'all';
+    // 퀴즈 Q2~Q4 답: { silhouette, palette, detail } (없으면 null) · 맞춤만 보기 여부
+    let quizPrefs = null;
+    let forYouOnly = false;
+    const fittingState = { headwear: null, top: null, bottom: null, bag: null };
+
+    const moodButtons = document.querySelectorAll('#mood-filter button');
+    const brandList = document.getElementById('brand-list');
+    const toneButtons = document.querySelectorAll('#tone-filter button');
+    const categoryButtons = document.querySelectorAll('#category-tabs button');
+    const itemGrid = document.getElementById('item-grid');
+    const itemCount = document.getElementById('item-count');
+    const itemEmpty = document.getElementById('item-empty');
+
+    // #endregion
+
+    // #region 취향 태그 (퀴즈 Q2 실루엣 · Q3 색 · Q4 디테일) — 상품명/색상 키워드로 모든 아이템 자동 분류
+    const TAG_RULES = {
+      silhouette: {
+        'Loose & Voluminous': /\b(WIDE|BALLOON|BAGGY|LOOSE|VOLUME|PUFF|PUFFER|PADDED|PADDING|FLEECE|HOBO|MAXI|TIERED|CARGO|SWEATPANTS|SWEATS|JOGGER|HAREM|QUILTED|FLUFFY|FUR|HAIRY|ANGORA|ALPACA|BOUCLE|BIG|LARGE|DUFFLE|SHOPPER|CARRYALL|GROCERY|BUCKET|FLARE|FLARED|BOOTCUT|SNUGGLE|MERMAID)\b/,
+        'Layered & Draped': /\b(LAYERED|LAYER|DRAPED|DRAPE|WRAP|COWL|SHIRRING|SHIRRED|RUCHED|TWIST|OVERLAY|DETACHABLE|SET|SCARF|MUFFLER|CARDIGAN|BOLERO|ASYMMETRIC|TIE|DOUBLE|TWO-WAY|REVERSIBLE|PLEATS|PLEATED|APRON|SLIT|TILTED|DIAGONAL|OBLIQUE|HALTER|KNIT)\b/,
+        'Slim & Cropped': /\b(SLIM|CROP|CROPPED|MINI|MICRO|SKINNY|LEGGINGS?|FITTED|HALF|SHORTS?|CAPRI|CARPI|CORSET|TANK|CAMISOLE|SLEEVELESS|HENLEY|RIB|RIBBED|BABY|SMALL|BAGUETTE|MOCK|TURTLE|HIGH-NECK|BERET|BEANIE|BALACLAVA|HAIRBAND|BIKINI|POUCH|POCHETTE|BELTED|WAIST|BERMUDA)\b/,
+        'Raw & Destroyed': /\b(DISTRESSED|WASHED|USED|RAW|CUT|DESTROYED|DAMAGED?|CRACKED|FADED|PIGMENT|STUD|STUDS|RIVET|CHAIN|CHAINMAIL|DENIM|JEANS|OVERLOCK|FRINGE|FRINGED|PATCH|REVERSE|WRINKLE|DIRTY|PULL-UP|AGED|LEATHER|GRUNGE|RIPPED|BAD|DYED|FLATSEAM|NET)\b/,
+        'Sheer & Frilled': /\b(SHEER|MESH|LACE|FRILL|FRILLED|RUFFLE|CHIFFON|SEE|EYELET|RIBBON|PINTUCK|BLOUSE|FLOWER|FLORAL|PUCKERING|SATIN|PLEATS|TULLE|BOW|CROCHE|CROCHET|ORGANZA|SCALLOP|HEART|ROSE|VICTORIAN|COSAGE|CORSAGE|DOT|SHELL)\b/,
+        'Oversized & Boxy': /\b(OVERSIZED|BOXY|HOODIE|HOODED|SWEATSHIRT|SWEAT|PULLOVER|ZIP-UP|ZIP|JACKET|RUGBY|CAMP|SHIRT|BACKPACK|CARPENTER|TRACK|STRAIGHT|TEE|T-SHIRT|TROUSERS|SLACKS|TOTE|ECOBAG|MESSENGER|TRUCKER|SNAPBACK|SWEATER|ANORAK|WORK|UTILITY)\b/
+      },
+      palette: {
+        'Dusty Rose': /\b(PINK|ROSE|MAUVE|LILAC|PURPLE|PLUM|WINE|BURGUNDY|RED|CORAL|PEACH|APRICOT|MAGENTA|UBE|BERRY|STRAWBERRY|CANDY|MAROON|LAVENDER|VIOLET|FRUIT|BITE)\b/,
+        'Faded Sage': /\b(GREEN|SAGE|MINT|KHAKI|OLIVE|TEAL|TURQUOISE|LIME|CAMO|SKY|LIGHT BLUE|ASH BLUE|DUSTY BLUE|PASTEL BLUE|STONE BLUE|AGED BLUE|VINTAGE BLUE|MIAMI BLUE)\b/,
+        'Antique Ivory': /\b(IVORY|WHITE|CREAM|ECRU|BEIGE|OATMEAL|OATMIL|NATURAL|BUTTER|STONE|LEMON|YELLOW|NUDE|VANILLA|MILK|LINEN|CHAMPAGNE)\b/,
+        'Washed Charcoal': /\b(BLACK|CHARCOAL|GREY|GRAY|GRAYSCALE|MELANGE|NAVY|INDIGO|DENIM|BLUE|DARK)\b/,
+        'Earthy Brown': /\b(BROWN|CAMEL|MOCHA|CHOCOLATE|CAPPUCCINO|TAUPE|MUSTARD|MARRON|MARRONE|ORANGE|LEOPARD|MAPLE|BEIGE|KHAKI BROWN|TAN|COGNAC|COFFEE|SUEDE|RUST|TERRACOTTA)\b/,
+        'Metallic Silver': /\b(SILVER|METALLIC|SHIMMER|LIGHT GREY|LIGHT GRAY|ASH GREY|GREY MELANGE|MELANGE GREY|MELANGE GRAY|CHROME|GLITTER|PEARL)\b/
+      },
+      detail: {
+        'Bonnet & Ribbon': /\b(BONNET|RIBBON|BOW|LACE|FRILL|BALACLAVA|EARFLAP|TRAPPER|HOOD|HOODED|HOODIE|SCARF|MUFFLER|HAIRBAND|BABUSHKA|BERET|BUCKET|FLOWER|HEART|ROSE|EAR|TIE)\b/,
+        'Studs & Buckles': /\b(STUDS?|BUCKLE|RIVET|CHAIN|CHAINMAIL|BELT|BELTED|HOOK|EYELET|STRAP|LEATHER|SNAP|HALF-SNAP|GROMMET|D-RING|HARDWARE|METAL|ZIP|ZIP-UP|HOTFIX|TOGGLE|GARTER)\b/,
+        'Chunky Pocket Bag': /\b(POCKET|CARGO|BACKPACK|TOTE|SHOPPER|HOBO|DUFFLE|CARRYALL|MESSENGER|UTILITY|CARPENTER|PADDED|QUILTED|ECOBAG|GROCERY|SACOCHE|BIG|LARGE|PACKABLE|BOWLING|CROSS)\b/,
+        'Vintage Cap': /\b(CAP|BALL|TRUCKER|SNAPBACK|NEWSBOY|BASEBALL|VINTAGE|WASHED|PIGMENT|FADED|USED|RETRO|CAMP)\b/
+      }
+    };
+    const TAG_CACHE = new Map();
+    // { silhouette: [...], palette: [...], detail: [...] }
+    function itemTags(item) {
+      if (TAG_CACHE.has(item.id)) return TAG_CACHE.get(item.id);
+      const full = item.name.toUpperCase();
+      const color = (full.match(/\[([^\]]+)\]/) || [, ''])[1];
+      const title = full.replace(/\[[^\]]*\]/g, ' ');
+      const pick = (rules, text) => Object.keys(rules).filter(k => rules[k].test(text));
+      const tags = {
+        silhouette: pick(TAG_RULES.silhouette, title),
+        // 색상칸이 있으면 색상칸으로, 없으면 이름 속 색 단어로 + 색 표기가 없는 아이템은 products.js의 palette(사진에서 뽑은 색)
+        palette: [...new Set(pick(TAG_RULES.palette, color || title).concat(item.palette ? [item.palette] : []))],
+        detail: pick(TAG_RULES.detail, title)
+      };
+      // 키워드가 하나도 안 걸린 아이템은 종류별 기본값으로
+      if (!tags.silhouette.length) {
+        tags.silhouette = [{ headwear: 'Slim & Cropped', top: 'Oversized & Boxy', bottom: 'Loose & Voluminous', bag: 'Oversized & Boxy' }[item.category]];
+      }
+      if (!tags.detail.length) {
+        tags.detail = [{ headwear: 'Vintage Cap', top: 'Bonnet & Ribbon', bag: 'Chunky Pocket Bag' }[item.category]].filter(Boolean);
+      }
+      if (!tags.palette.length) tags.palette = ['Washed Charcoal'];
+      TAG_CACHE.set(item.id, tags);
+      return tags;
+    }
+
+    // 퀴즈 취향과 맞는 항목 이름들 (Q1 무드 · Q2 실루엣 · Q3 색)
+    function matchLabels(item) {
+      if (!quizPrefs) return [];
+      const tags = itemTags(item);
+      const hits = [];
+      if (quizPrefs.mood && item.mood === quizPrefs.mood) hits.push(quizPrefs.moodLabel);
+      ['silhouette', 'palette', 'detail']
+        .filter(k => quizPrefs[k] && tags[k].includes(quizPrefs[k]))
+        .forEach(k => hits.push(quizPrefs[k]));
+      return hits;
+    }
+    // 답한 질문 수 (MATCH 분모)
+    function prefCount() {
+      return quizPrefs ? ['mood', 'silhouette', 'palette', 'detail'].filter(k => quizPrefs[k]).length : 0;
+    }
+    function matchScore(item) {
+      return matchLabels(item).length;
+    }
+
+    // 상품 목록 위 [✦ FOR YOU] 줄: 퀴즈에서 고른 취향 · 맞춤만 보기 · 해제
+    function updateForYouBar() {
+      const bar = document.getElementById('for-you-bar');
+      bar.hidden = !quizPrefs;
+      if (!quizPrefs) return;
+      document.getElementById('fy-picks').textContent =
+        [quizPrefs.moodLabel, quizPrefs.silhouette, quizPrefs.palette, quizPrefs.detail].filter(Boolean).join(' · ');
+      document.getElementById('fy-only').classList.toggle('active', forYouOnly);
+    }
+    document.getElementById('fy-only').addEventListener('click', () => {
+      forYouOnly = !forYouOnly;
+      updateForYouBar();
+      renderProductItems();
+    });
+    document.getElementById('fy-clear').addEventListener('click', () => {
+      quizPrefs = null;
+      forYouOnly = false;
+      updateForYouBar();
+      renderProductItems();
+    });
+    // #endregion
+
+    // #region 브랜드 칩 · 옷 카드 · 룩보드
+    // 브랜드 칩 렌더링
+    // BRAND 목록은 처음 BRAND_PREVIEW 개만 보여주고 [+ 더보기 / 접기]로 펼침
+    const BRAND_PREVIEW = 8;
+    let brandsExpanded = false;
+    const brandToggle = document.getElementById('brand-toggle');
+    brandToggle.addEventListener('click', function () {
+      brandsExpanded = !brandsExpanded;
+      updateBrandToggle();
+    });
+
+    function updateBrandToggle() {
+      const extra = brandList.querySelectorAll('.brand-extra').length;
+      brandToggle.hidden = extra === 0;
+      brandList.classList.toggle('is-collapsed', extra > 0 && !brandsExpanded);
+      brandToggle.textContent = brandsExpanded ? '− 접기' : `+ 더보기 (${extra})`;
+    }
+
+    function renderBrands(mood) {
+      const brands = mood === 'all'
+        ? Object.values(brandsByMood).flat()
+        : brandsByMood[mood];
+
+      brandList.innerHTML = '';
+      
+      const allChip = document.createElement('button');
+      allChip.type = 'button';
+      allChip.textContent = 'All';
+      if (selectedBrand === 'all') allChip.classList.add('active');
+      allChip.addEventListener('click', () => {
+        selectedBrand = 'all';
+        brandList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        allChip.classList.add('active');
+        renderProductItems();
+      });
+      brandList.appendChild(allChip);
+
+      brands.forEach(function (brand, index) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.textContent = brand;
+        if (selectedBrand.toUpperCase() === brand.toUpperCase()) chip.classList.add('active');
+
+        chip.addEventListener('click', function () {
+          if (selectedBrand.toUpperCase() === brand.toUpperCase()) {
+            selectedBrand = 'all';
+            chip.classList.remove('active');
+            allChip.classList.add('active');
+          } else {
+            selectedBrand = brand;
+            brandList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            chip.classList.add('active');
+          }
+          renderProductItems();
+        });
+
+        // 앞의 BRAND_PREVIEW 개 이후는 접힘 대상 (선택된 브랜드가 뒤쪽이면 목록을 펼쳐서 보이게)
+        if (index >= BRAND_PREVIEW) {
+          chip.classList.add('brand-extra');
+          if (chip.classList.contains('active')) brandsExpanded = true;
+        }
+        brandList.appendChild(chip);
+      });
+      updateBrandToggle();
+    }
+
+    // 옷 리스트 카드 렌더링
+    function renderProductItems() {
+      if (!itemGrid) return;
+      itemGrid.innerHTML = '';
+
+      if (typeof PRODUCTS === 'undefined' || !PRODUCTS.length) {
+        itemCount.textContent = '0 pieces';
+        itemEmpty.hidden = false;
+        return;
+      }
+
+      let filtered = PRODUCTS.filter(p => {
+        const matchCat = (selectedCategory === 'all' || p.category.toLowerCase() === selectedCategory.toLowerCase());
+        const matchBrand = (selectedBrand === 'all' || p.brand.toUpperCase() === selectedBrand.toUpperCase());
+        const matchTone = (selectedTone === 'all' || (p.tone && p.tone.toLowerCase().includes(selectedTone.toLowerCase())));
+        const matchMood = (selectedMood === 'all' || (p.mood && p.mood.toLowerCase().replace(/[^a-z]/g, '').includes(selectedMood.toLowerCase().replace(/[^a-z]/g, ''))));
+        return matchCat && matchBrand && matchTone && matchMood;
+      });
+
+      // 퀴즈 취향(실루엣·색·디테일)에 많이 맞는 아이템부터 보여주기
+      const scores = new Map();
+      if (quizPrefs) {
+        filtered.forEach(p => scores.set(p.id, matchScore(p)));
+        if (forYouOnly) filtered = filtered.filter(p => scores.get(p.id) >= 2);
+        filtered = filtered
+          .map((p, i) => [p, i])
+          .sort((a, b) => scores.get(b[0].id) - scores.get(a[0].id) || a[1] - b[1])
+          .map(x => x[0]);
+      }
+
+      itemCount.textContent = `${filtered.length} pieces`;
+      itemEmpty.hidden = filtered.length > 0;
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.dataset.id = item.id;
+        if (fittingState[item.category] && fittingState[item.category].id === item.id) {
+          card.classList.add('is-selected');
+        }
+
+        card.innerHTML = `
+          <div class="item-img-wrap">
+            ${(scores.get(item.id) || 0) >= 2 ? `<span class="fy-badge" title="${matchLabels(item).join(' · ')}">✦ ${scores.get(item.id)}/${prefCount()} MATCH</span>` : ''}
+            <img src="${item.image}" alt="${item.name}"${cardImageStyle(item)}>
+          </div>
+          <div class="item-info">
+            <span class="item-brand">${item.brand}</span>
+            <div class="item-name">${splitColor(item.name).title}</div>
+            ${colorChips(item.name)}
+            <div class="item-price">${formatWon(priceNumber(item.price))}</div>
+            <a href="${item.musinsaUrl}" target="_blank" rel="noopener" class="item-shop" onclick="event.stopPropagation()">SHOP THE ARCHIVE ↗</a>
+          </div>
+        `;
+
+        card.addEventListener('click', () => wearItem(item));
+        itemGrid.appendChild(card);
+      });
+    }
+
+    // 색상 뱃지: "ECRU/BLACK" 처럼 여러 색이면 뱃지를 나눠서
+    function colorChips(name) {
+      const color = splitColor(name).color;
+      if (!color) return '';
+      const chips = color.split(/\s*[\/,]\s*/).filter(Boolean)
+        .map(c => `<span class="color-chip">${c}</span>`).join('');
+      return `<div class="item-color">${chips}</div>`;
+    }
+
+    // "제품명 [색상]" → { title, color }
+    function splitColor(name) {
+      const m = name.match(/^(.*?)\s*\[([^\]]+)\]\s*$/);
+      return m ? { title: m[1], color: m[2] } : { title: name, color: '' };
+    }
+
+    // 상품 카드: 실제 옷 영역(card-boxes.js)이 카드의 CARD_FILL 만큼 차도록 이미지 크기·위치 계산
+    const CARD_FILL = 0.66;
+    function cardImageStyle(item) {
+      const b = (window.CARD_BOXES || {})[item.image];
+      if (!b) return '';
+      const [x0, x1, y0, y1, ratio] = b;
+      const bw = x1 - x0;
+      const bh = (y1 - y0) * ratio;
+      // 상품 카드는 scale과 상관없이 모두 같은 크기 (scale은 코디북에만 적용)
+      const w = CARD_FILL / Math.max(bw, bh);
+      const left = (1 - bw * w) / 2 - x0 * w;
+      const top = (1 - bh * w) / 2 - y0 * ratio * w;
+      return ` class="is-fit" style="width:${(w * 100).toFixed(2)}%;left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%"`;
+    }
+
+    // 룩보드에는 배경을 투명하게 뺀 images_cut/ 버전을 씀 (없으면 원본으로 대체)
+    function cutImagePath(path) {
+      return path.replace(/^images\//, 'images_cut/');
+    }
+
+    document.querySelectorAll('#layering-board .slot-img').forEach(function (img) {
+      img.addEventListener('error', function () {
+        const src = img.getAttribute('src') || '';
+        if (src.startsWith('images_cut/')) {
+          img.closest('.slot').classList.add('no-cut');
+          img.src = src.replace(/^images_cut\//, 'images/');
+        }
+      });
+    });
+
+    // 캔버스에 올라간 아이템(fittingState)의 카드에만 is-selected 를 붙이고 나머지는 떼어냄
+    function updateSelectedCards() {
+      const ids = new Set(Object.values(fittingState).filter(Boolean).map(i => String(i.id)));
+      document.querySelectorAll('#item-grid .item-card').forEach(card => {
+        card.classList.toggle('is-selected', ids.has(card.dataset.id));
+      });
+    }
+
+    // 아이템 id 로 정해지는 -2.4° ~ 2.4° 기울기
+    function paperTilt(id) {
+      let h = 0;
+      for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return ((h % 9) - 4) * 0.6;
+    }
+
+    // 룩보드 착장
+    function wearItem(item) {
+      fittingState[item.category] = item;
+      const slot = document.getElementById(`slot-${item.category}`);
+      if (slot) {
+        slot.classList.add('is-filled');
+        slot.querySelector('.slot-empty').hidden = true;
+        const filledBtn = slot.querySelector('.slot-filled');
+        filledBtn.hidden = false;
+        slot.classList.remove('no-cut');
+        filledBtn.querySelector('.slot-img').src = cutImagePath(item.image);
+        filledBtn.querySelector('.slot-caption').textContent = `${item.brand} - ${item.name}`;
+        // 페이퍼돌 느낌: 아이템마다 정해진 각도로 살짝 삐뚤게 (같은 옷은 항상 같은 각도)
+        slot.style.setProperty('--tilt', paperTilt(item.id) + 'deg');
+      }
+      layoutAll();
+      updateSelectedCards();
+      updateLookTotal();
+    }
+
+    // 룩보드 옷 벗기기
+    function unwearSlot(category) {
+      fittingState[category] = null;
+      const slot = document.getElementById(`slot-${category}`);
+      if (slot) {
+        slot.classList.remove('is-filled');
+        slot.querySelector('.slot-empty').hidden = false;
+        slot.querySelector('.slot-filled').hidden = true;
+      }
+      layoutAll();
+      updateSelectedCards();
+      updateLookTotal();
+    }
+
+    // 하의가 상의 밑단에 가려 잘리지 않도록, 상의 실제 길이에 맞춰 하의 시작 위치를 조정
+    function layoutBoard() {
+      const board = document.getElementById('layering-board');
+      const topSlot = document.getElementById('slot-top');
+      const bottomSlot = document.getElementById('slot-bottom');
+      const topImg = topSlot.querySelector('.slot-img');
+
+      if (!topSlot.classList.contains('is-filled') || !topImg.naturalWidth) {
+        bottomSlot.style.top = '';
+        bottomSlot.style.height = '';
+        return;
+      }
+
+      const boardH = board.clientHeight;
+      const slotW = topSlot.clientWidth;
+      const slotH = topSlot.clientHeight;
+      const fit = topSlot._fit;
+      const shownH = fit
+        ? fit.top + fit.contentH
+        : Math.min(slotH, slotW * topImg.naturalHeight / topImg.naturalWidth);
+      const hemPct = (topSlot.offsetTop + shownH) / boardH * 100;
+      // 하의 허리선을 상의 밑단 살짝 안쪽(1.5%)에 붙여서 상·하의 사이가 뜨지 않게
+      const startPct = Math.min(62, Math.max(24, hemPct - 1.5));
+      bottomSlot.style.top = startPct + '%';
+      bottomSlot.style.height = (98 - startPct) + '%';
+    }
+
+    // 모자 이미지에서 흰 여백을 뺀 실제 모자 영역(0~1 비율)을 찾음
+    function measureContent(img) {
+      try {
+        const w = 160;
+        const h = Math.max(1, Math.round(w * img.naturalHeight / img.naturalWidth));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const px = ctx.getImageData(0, 0, w, h).data;
+        let x0 = w, x1 = -1, y0 = h, y1 = -1;
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            if (px[i + 3] > 20 && (px[i] < 240 || px[i + 1] < 240 || px[i + 2] < 240)) {
+              if (x < x0) x0 = x;
+              if (x > x1) x1 = x;
+              if (y < y0) y0 = y;
+              if (y > y1) y1 = y;
+            }
+          }
+        }
+        if (x1 < 0) return null;
+        return { x0: x0 / w, x1: (x1 + 1) / w, y0: y0 / h, y1: (y1 + 1) / h };
+      } catch (e) {
+        // file:// 로 열어서 캔버스를 못 읽으면 기존 방식(contain)으로 표시
+        return null;
+      }
+    }
+
+    // 모자 너비를 슬롯 너비(머리통)에 맞추고, 모자 몸통 아랫단을 슬롯 아래에 맞춤.
+    // 그보다 길게 내려오는 끈은 슬롯 밖으로 흘러 상의 위에 겹쳐짐
+    // 미리 계산해 둔 영역(image-boxes.js)을 먼저 쓰고, 없으면 캔버스로 측정
+    function getHatBox(img) {
+      const src = (img.getAttribute('src') || '').replace(/^images_cut\//, 'images/');
+      const saved = (window.IMAGE_BOXES || {})[src];
+      if (saved) {
+        // cx: 옷 몸판의 세로 중심선 위치 (끈·리본이 한쪽으로 늘어져도 몸판 기준으로 정렬)
+        return { x0: saved[0], x1: saved[1], y0: saved[2], y1: saved[3], ratio: saved[4], cx: saved[5] };
+      }
+      if (img._contentBox && img.naturalWidth) {
+        return { ...img._contentBox, ratio: img.naturalHeight / img.naturalWidth };
+      }
+      return null;
+    }
+
+    // 머리에 쓰는 게 아니라 목에 두르는 아이템 (SCARF CAP, HOODED MUFFLER 처럼 머리에 쓰는 건 제외)
+    function isNeckwear(item) {
+      if (!item) return false;
+      return /SCARF|MUFFLER|SHAWL|STOLE/i.test(item.name)
+        && !/CAP|HAT|HOOD|BEANIE|BALACLAVA|BONNET/i.test(item.name);
+    }
+
+    function layoutHeadwear() {
+      const slot = document.getElementById('slot-headwear');
+      const img = slot.querySelector('.slot-img');
+      const box = slot.classList.contains('is-filled') ? getHatBox(img) : null;
+      if (!box) {
+        img.style.removeProperty('--hat-w');
+        img.style.removeProperty('--hat-left');
+        img.style.removeProperty('--hat-top');
+        return;
+      }
+      const slotW = slot.clientWidth;
+      const slotH = slot.clientHeight;
+      const neckwear = isNeckwear(fittingState.headwear);
+      // 스카프·머플러는 머리가 아니라 목에: 슬롯(머리) 아래 끝에서 시작해 상의 앞으로 늘어뜨림
+      const tweak = itemTweak(fittingState.headwear);
+      const hatW = slotW * (neckwear ? 0.85 : 0.9) * tweak.scale;
+      const shownW = hatW / (box.x1 - box.x0);
+      const shownH = shownW * box.ratio;
+      const contentH = (box.y1 - box.y0) * shownH;
+      const crownH = Math.min(contentH, hatW * 0.8);
+      // 스카프·머플러: 상의 슬롯 시작선(목선)보다 캔버스 높이 1.5% 위에서 시작해 목에 걸린 것처럼
+      const boardH = document.getElementById('layering-board').clientHeight;
+      const neckY = document.getElementById('slot-top').offsetTop - slot.offsetTop - boardH * 0.015;
+      let contentTop = neckwear ? neckY : slotH - crownH;
+      // 크게 키운 모자가 캔버스 위로 잘리지 않게, 위 끝이 캔버스 상단 2% 안쪽으로 오도록 내림
+      const boardTopGap = document.getElementById('layering-board').clientHeight * 0.02;
+      contentTop = Math.max(contentTop, boardTopGap - slot.offsetTop);
+      img.style.setProperty('--hat-w', shownW + 'px');
+      const hatLeft = box.cx != null ? slotW / 2 - box.cx * shownW : (slotW - hatW) / 2 - box.x0 * shownW;
+      img.style.setProperty('--hat-left', hatLeft + 'px');
+      const offsetPx = tweak.offsetY / 100 * document.getElementById('layering-board').clientHeight;
+      img.style.setProperty('--hat-top', (contentTop + offsetPx - box.y0 * shownH) + 'px');
+      slot.style.setProperty('--rm-x', (hatLeft + box.x1 * shownW) + 'px');
+      slot.style.setProperty('--rm-y', (contentTop + offsetPx) + 'px');
+    }
+
+    // 코디북 착장 비율: 부위별 "기준 가로 너비"로 크기를 맞춤 (사진 여백·기장과 무관)
+    //  - top    : 실제 옷 너비 = TOP_WIDTH_PX (캔버스 425px 기준, 캔버스 크기에 비례), 세로 제한 없음
+    //  - bottom : 실제 옷 너비 = BOTTOM_WIDTH_PX (상의와 거의 1:1), 긴 기장은 아래로 늘어짐
+    //  - bag    : 슬롯 안에 들어오게 (가로 95% / 세로 100% 중 작은 쪽)
+    // 아이템별 미세 보정: products.js 항목에 scale(기본 1), offsetY(기본 0, 캔버스 높이 대비 %)를 넣으면 적용
+    //   예) { ..., scale: 1.3 }  → 30% 크게,  { ..., scale: 0.85, offsetY: 2 } → 15% 작게 + 2% 아래로
+    // 사진 여백을 뺀 "실제 옷" 너비(px). 425px 캔버스 기준이며 화면이 작으면 같은 비율로 줄어듦
+    const BOARD_BASE_PX = 425;
+    const TOP_WIDTH_PX = 190;
+    const BOTTOM_WIDTH_PX = 175;
+    const SLEEVELESS = /SLEEVELESS|TANK|CAMI|BUSTIER|HALTER|TUBE TOP|BRA TOP|VEST TOP|나시/i;
+    const BAG_BASE_SCALE = 1.12;
+    const BAG_BRAND_SCALE = { SINOON: 1.5 };
+
+    function itemTweak(item) {
+      return {
+        scale: item && Number(item.scale) > 0 ? Number(item.scale) : 1,
+        offsetY: item && Number(item.offsetY) ? Number(item.offsetY) : 0,
+      };
+    }
+
+    function layoutClothes(category) {
+      const slot = document.getElementById(`slot-${category}`);
+      const img = slot.querySelector('.slot-img');
+      const box = slot.classList.contains('is-filled') ? getHatBox(img) : null;
+      slot._fit = null;
+      if (!box) {
+        img.classList.remove('is-fit');
+        return;
+      }
+      const board = document.getElementById('layering-board');
+      const slotW = slot.clientWidth;
+      const slotH = slot.clientHeight;
+      const boxW = box.x1 - box.x0;
+      const boxH = (box.y1 - box.y0) * box.ratio;
+      const item = fittingState[category];
+      const tweak = itemTweak(item);
+      const pxScale = board.clientWidth / BOARD_BASE_PX;
+
+      let shownW;
+      if (category === 'top') {
+        shownW = (TOP_WIDTH_PX * pxScale) / boxW;
+        // 민소매·캐미솔·좁은 긴팔처럼 세로로 긴 상의는 너비만 맞추면 덩치가 커 보이므로
+        // 면적(√가로×세로)이 기준의 1.05배를 넘지 않게 줄임
+        shownW = Math.min(shownW, (TOP_WIDTH_PX * 1.05 * pxScale) / Math.sqrt(boxW * boxH));
+        // 기장도 기준 너비만큼으로 상한 → 원숄더·몸에 붙는 긴팔처럼 세로로 긴 상의가 유독 커 보이지 않게
+        shownW = Math.min(shownW, (TOP_WIDTH_PX * pxScale) / boxH);
+        // 나시·캐미솔·홀터처럼 소매가 없는 상의는 사진 폭 = 몸판 폭이라, 소매 있는 옷과
+        // 몸판 크기가 같아 보이도록 기준 너비의 68%로
+        if (SLEEVELESS.test(item?.name || '')) {
+          shownW = Math.min(shownW, (TOP_WIDTH_PX * 0.68 * pxScale) / boxW);
+        }
+      } else if (category === 'bottom') {
+        shownW = (BOTTOM_WIDTH_PX * pxScale) / boxW;
+      } else {
+        shownW = Math.min(slotW * 0.95 / boxW, slotH / boxH);
+        // 가방은 전체적으로 조금 더 크게 (오른쪽 벽 여백은 아래에서 따로 지킴)
+        shownW *= BAG_BASE_SCALE;
+        shownW *= BAG_BRAND_SCALE[(item?.brand || '').toUpperCase()] || 1;
+      }
+      shownW *= tweak.scale;
+
+      // 캔버스 아래로 잘리지 않게: 남은 높이보다 길면 그만큼만 줄임 (긴 바지·롱스커트)
+      const room = board.getBoundingClientRect().bottom - slot.getBoundingClientRect().top - 8;
+      if (boxH * shownW > room) shownW = room / boxH;
+
+      const contentW = boxW * shownW;
+      const contentH = boxH * shownW;
+      const offsetPx = tweak.offsetY / 100 * board.clientHeight;
+      // 가방은 슬롯 세로 가운데, 상·하의는 어깨/허리선을 슬롯 위에 맞춤
+      const baseTop = category === 'bag' ? (slotH - contentH) / 2 : 0;
+      img.style.setProperty('--img-w', shownW + 'px');
+      let left = (slotW - contentW) / 2;
+      if (category === 'bag') {
+        // 큰 가방도 캔버스 오른쪽 벽에 닿지 않게 (오른쪽 6% 여백 유지)
+        const overflow = slot.offsetLeft + left + contentW - board.clientWidth * 0.94;
+        if (overflow > 0) left -= overflow;
+      }
+      // 상의·하의는 몸판 중심선(cx)을 슬롯 가운데에 맞춰서 모자·상의·하의가 일자로 정렬되게
+      const imgLeft = category !== 'bag' && box.cx != null
+        ? slotW / 2 - box.cx * shownW
+        : left - box.x0 * shownW;
+      img.style.setProperty('--img-left', imgLeft + 'px');
+      // 빼기(x) 버튼: 실제 옷의 오른쪽 위 모서리
+      slot.style.setProperty('--rm-x', (imgLeft + box.x1 * shownW) + 'px');
+      slot.style.setProperty('--rm-y', (baseTop + offsetPx) + 'px');
+      img.style.setProperty('--img-top', (baseTop + offsetPx - box.y0 * box.ratio * shownW) + 'px');
+      img.classList.add('is-fit');
+      slot._fit = { top: baseTop + offsetPx, contentH };
+    }
+
+    // 상의 크기 → 하의 시작 위치 → 하의 크기 순서로 다시 배치
+    function layoutAll() {
+      layoutClothes('top');
+      layoutBoard();
+      layoutClothes('bottom');
+      layoutClothes('bag');
+      layoutHeadwear();
+      placeRemoveButtons();
+      // 기울기 애니메이션(0.35s)이 끝난 뒤 위치를 한 번 더 맞춤
+      clearTimeout(placeRemoveButtons.timer);
+      placeRemoveButtons.timer = setTimeout(placeRemoveButtons, 400);
+    }
+
+    // 각 옷의 오른쪽 위(슬롯 안 기준점 .slot-remove)를 따라 맨 앞 레이어의 x 버튼을 배치
+    function placeRemoveButtons() {
+      const board = document.getElementById('layering-board');
+      const b = board.getBoundingClientRect();
+      document.querySelectorAll('#remove-layer .board-remove').forEach(btn => {
+        const slot = document.getElementById(`slot-${btn.dataset.cat}`);
+        const anchor = slot.querySelector('.slot-remove');
+        if (!slot.classList.contains('is-filled') || !anchor) { btn.hidden = true; return; }
+        const r = anchor.getBoundingClientRect();
+        const x = Math.min(Math.max(r.left + r.width / 2 - b.left, 14), board.clientWidth - 14);
+        const y = Math.min(Math.max(r.top + r.height / 2 - b.top, 14), board.clientHeight - 14);
+        btn.style.left = (x - 11) + 'px';
+        btn.style.top = (y - 11) + 'px';
+        btn.hidden = false;
+      });
+    }
+
+    document.querySelectorAll('#remove-layer .board-remove').forEach(btn => {
+      btn.addEventListener('click', () => unwearSlot(btn.dataset.cat));
+    });
+
+    document.querySelector('#slot-headwear .slot-img').addEventListener('load', function () {
+      this._contentBox = measureContent(this);
+      layoutHeadwear();
+    });
+
+    ['top', 'bottom', 'bag'].forEach(function (category) {
+      document.querySelector(`#slot-${category} .slot-img`).addEventListener('load', function () {
+        this._contentBox = measureContent(this);
+        layoutAll();
+      });
+    });
+    window.addEventListener('resize', layoutAll);
+
+    // #endregion
+
+    // #region 버튼 이벤트 연결
+    // 톤(TONE) 버튼 이벤트 리스너 연결
+    toneButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        toneButtons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        selectedTone = button.dataset.tone || button.textContent.trim();
+        renderProductItems();
+      });
+    });
+
+    // 카테고리 탭 이벤트 연결
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        categoryButtons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        selectedCategory = button.dataset.category;
+        renderProductItems();
+      });
+    });
+
+    // 무드 필터 클릭 이벤트 연결
+    moodButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        moodButtons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        selectedMood = button.dataset.mood;
+        renderBrands(selectedMood);
+        renderProductItems();
+      });
+    });
+
+    // 룩 초기화 / 저장 버튼
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      ['headwear', 'top', 'bottom', 'bag'].forEach(unwearSlot);
+    });
+
+
+
+    // #endregion
+
+    // #region 화면 전환
+    // 화면 전환 함수
+    const introScreen = document.getElementById('intro-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const mainApp = document.getElementById('main-app');
+    const FADE_MS = 800;
+
+    function switchScreen(from, to) {
+      from.classList.remove('fade-in');
+      from.classList.add('fade-out');
+
+      setTimeout(function () {
+        from.hidden = true;
+        to.hidden = false;
+        window.scrollTo(0, 0);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            to.classList.add('fade-in');
+          });
+        });
+      }, FADE_MS);
+    }
+
+    // #endregion
+
+    // #region 취향 질문 (퀴즈)
+    // 퀴즈 데이터
+    const quizSteps = [
+      {
+        label: 'Q1 · Mood & Core',
+        question: 'Which mood is calling you today?',
+        questionKo: '오늘은 어떤 무드에 마음이 끌리나요?',
+        options: [
+          { label: 'Fairy Mori', mood: 'fairy-mori' },
+          { label: 'Dreamy Grunge', mood: 'fairy-mori' },
+          { label: 'Deconstructed Cyber', mood: 'deconstructed-cyber' },
+          { label: 'Nostalgic Vintage', mood: 'vintage-retro' },
+          { label: 'Subculture Gothic', mood: 'subculture-acc' },
+          { label: 'Cozy Minimal', mood: 'vintage-retro' }
+        ]
+      },
+      {
+        label: 'Q2 · Silhouette & Texture',
+        question: 'How should it fall on you?',
+        questionKo: '옷이 몸 위에 어떤 모양으로 흐르면 좋을까요?',
+        options: [
+          { label: 'Loose & Voluminous' },
+          { label: 'Layered & Draped' },
+          { label: 'Slim & Cropped' },
+          { label: 'Raw & Destroyed' },
+          { label: 'Sheer & Frilled' },
+          { label: 'Oversized & Boxy' }
+        ]
+      },
+      {
+        label: 'Q3 · Color Palette',
+        question: 'Pick the color of your daydream.',
+        questionKo: '당신의 몽상을 닮은 색을 골라 주세요.',
+        options: [
+          { label: 'Dusty Rose', keyword: '더스티 핑크' },
+          { label: 'Faded Sage', keyword: '세이지' },
+          { label: 'Antique Ivory', keyword: '아이보리' },
+          { label: 'Washed Charcoal', keyword: '차콜' },
+          { label: 'Earthy Brown', keyword: '브라운' },
+          { label: 'Metallic Silver', keyword: '실버' }
+        ]
+      }
+    ];
+
+    const answers = [null, null, null];
+    let currentStep = 0;
+    let isChanging = false;
+
+    const quizCard = document.getElementById('quiz-card');
+    const quizLabel = document.getElementById('quiz-label');
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizQuestionKo = document.getElementById('quiz-question-ko');
+    const quizOptions = document.getElementById('quiz-options');
+    const quizStepText = document.getElementById('quiz-step');
+    const quizDots = document.querySelectorAll('.quiz-dots span');
+    const quizBack = document.getElementById('quiz-back');
+    const openClosetButton = document.getElementById('open-closet-btn');
+
+    function renderQuestion() {
+      const step = quizSteps[currentStep];
+      quizLabel.textContent = step.label;
+      quizQuestion.textContent = step.question;
+      quizQuestionKo.textContent = step.questionKo;
+      quizStepText.textContent = currentStep + 1;
+      quizBack.hidden = currentStep === 0;
+      quizOptions.innerHTML = '';
+      quizOptions.classList.toggle('is-cube', step.options.length === 4);
+
+      step.options.forEach(function (option) {
+        const optionButton = document.createElement('button');
+        optionButton.type = 'button';
+        optionButton.className = 'option-btn';
+        optionButton.textContent = option.label;
+        if (answers[currentStep] === option) {
+          optionButton.classList.add('active');
+        }
+        optionButton.addEventListener('click', function () {
+          selectOption(option, optionButton);
+        });
+        quizOptions.appendChild(optionButton);
+      });
+
+      quizDots.forEach(function (dot, i) {
+        dot.classList.toggle('done', answers[i] !== null);
+        dot.classList.toggle('current', i === currentStep);
+      });
+    }
+
+    function goToStep(stepIndex) {
+      isChanging = true;
+      quizCard.classList.add('is-hidden');
+      setTimeout(function () {
+        currentStep = stepIndex;
+        renderQuestion();
+        quizCard.classList.remove('is-hidden');
+        isChanging = false;
+      }, 400);
+    }
+
+    function selectOption(option, optionButton) {
+      if (isChanging) return;
+
+      answers[currentStep] = option;
+      quizOptions.querySelectorAll('.option-btn').forEach(function (b) {
+        b.classList.remove('active');
+      });
+      optionButton.classList.add('active');
+      quizDots[currentStep].classList.add('done');
+
+      openClosetButton.disabled = answers.includes(null);
+
+      if (currentStep < quizSteps.length - 1) {
+        isChanging = true;
+        setTimeout(function () {
+          goToStep(currentStep + 1);
+        }, 550);
+      }
+    }
+
+    quizBack.addEventListener('click', function () {
+      if (isChanging || currentStep === 0) return;
+      goToStep(currentStep - 1);
+    });
+
+    // 첫 화면 제목: 글자 잉크 영역을 재서 SVG viewBox 로 지정 → 박스(94vw x 90vh)를 세로로 늘려 꽉 채움
+    function fitIntroTitle() {
+      const svg = document.getElementById('intro-title-svg');
+      if (!svg) return;
+      const text = svg.querySelector('text');
+      const cs = getComputedStyle(text);
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = `${cs.fontWeight} 100px ${cs.fontFamily}`;
+      const m = ctx.measureText(text.textContent);
+      const left = m.actualBoundingBoxLeft, right = m.actualBoundingBoxRight;
+      const up = m.actualBoundingBoxAscent, down = m.actualBoundingBoxDescent;
+      const pad = 2.5; // 외곽선(stroke-width 5)의 절반만큼 여유
+      svg.setAttribute('viewBox', `${-left - pad} ${-up - pad} ${left + right + pad * 2} ${up + down + pad * 2}`);
+    }
+    fitIntroTitle();
+    window.addEventListener('resize', fitIntroTitle);
+    if (document.fonts) {
+      document.fonts.ready.then(fitIntroTitle);
+      document.fonts.load('900 100px "Noto Sans KR"', 'MUSH ROOM').then(fitIntroTitle).catch(() => {});
+    }
+
+    document.getElementById('enter-btn').addEventListener('click', function () {
+      const door = this;
+      if (door.classList.contains('is-opening')) return;
+      door.classList.add('is-opening');
+      renderQuestion();
+      // 버튼에서 빛이 번지는 걸 잠깐 보여준 뒤 넘어감
+      setTimeout(function () {
+        switchScreen(introScreen, quizScreen);
+        setTimeout(function () { door.classList.remove('is-opening'); }, 1200);
+      }, 550);
+    });
+
+    openClosetButton.addEventListener('click', function () {
+      const resultList = document.getElementById('result-list');
+      resultList.innerHTML = '';
+      quizSteps.forEach(function (step, i) {
+        const item = document.createElement('li');
+        item.textContent = step.label.split(' · ')[1] + ' — ' + (answers[i] ? answers[i].label : '');
+        resultList.appendChild(item);
+      });
+
+      if (answers[0] && answers[0].mood) {
+        const moodButton = document.querySelector('#mood-filter button[data-mood="' + answers[0].mood + '"]');
+        if (moodButton) moodButton.click();
+      }
+
+      // Q1 무드 · Q2 실루엣 · Q3 색 → 아이템과 맞춰서 많이 맞는 것부터 정렬 (MATCH n/3)
+      quizPrefs = {
+        mood: answers[0] ? answers[0].mood : null,
+        moodLabel: answers[0] ? answers[0].label : null,
+        silhouette: answers[1] ? answers[1].label : null,
+        palette: answers[2] ? answers[2].label : null,
+        detail: null   // 디테일 질문은 없앰
+      };
+      forYouOnly = false;
+      updateForYouBar();
+
+      switchScreen(quizScreen, mainApp);
+      renderProductItems();
+    });
+
+    // #endregion
+
+
+    // #region 토스트 안내
+    let toastTimer = null;
+    function showToast(message, duration) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), duration || 2600);
+    }
+    // #endregion
+
+    // #region 공통 모달 열고 닫기
+    function openModal(modal) {
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(modal) {
+      modal.hidden = true;
+      if (document.querySelectorAll('.modal:not([hidden])').length === 0) document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', e => {
+        if (e.target === modal || e.target.closest('[data-close]')) closeModal(modal);
+      });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll('.modal:not([hidden])').forEach(closeModal);
+    });
+    // #endregion
+
+    // #region 가격 · 합계
+    const SLOT_LABELS = { headwear: '모자', top: '상의', bottom: '하의', bag: '가방' };
+    const SLOT_ORDER = ['headwear', 'top', 'bottom', 'bag'];
+
+    function priceNumber(price) {
+      return parseInt(String(price || '').replace(/[^0-9]/g, ''), 10) || 0;
+    }
+    function formatWon(n) {
+      return n.toLocaleString('ko-KR') + '원';
+    }
+    function wornItems() {
+      return SLOT_ORDER.map(cat => fittingState[cat]).filter(Boolean);
+    }
+    function updateLookTotal() {
+      const total = wornItems().reduce((sum, item) => sum + priceNumber(item.price), 0);
+      document.getElementById('look-total-value').textContent = formatWon(total);
+      // 모자·상의·하의 중 1개 이상 입으면 [save me!] 버튼 표시 (저장 조건과 같음)
+      document.getElementById('save-me-btn').hidden = !wornItems().some(i => i.category !== 'bag');
+      const count = wornItems().length;
+      document.getElementById('board-hint').hidden = count > 0;
+      document.getElementById('board-jump').hidden = count === 0;
+      document.getElementById('board-jump-count').textContent = count;
+      document.getElementById('board-clear-btn').hidden = count === 0;
+    }
+    // #endregion
+
+    // #region 로그인 · 회원가입 · 비밀번호 재설정 (Supabase Auth)
+    // Publishable 키는 브라우저에 공개돼도 되는 키. 실제 데이터 보호는 Supabase 의 RLS 정책이 담당
+    const SUPABASE_URL = 'https://rvzxugdlvolvjkmdyqfg.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_H-aBpL-frMMKmx89VpaqhA_CXiM4Sec';
+    const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) : null;
+    let authUser = null;   // 로그인한 Supabase 유저 (없으면 null)
+
+    function readJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; }
+    }
+    function writeJSON(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+    }
+    function currentUser() {
+      if (!authUser) return null;
+      const meta = authUser.user_metadata || {};
+      return { id: authUser.id, email: authUser.email, name: meta.name || authUser.email.split('@')[0] };
+    }
+
+    const authModal = document.getElementById('auth-modal');
+    function showAuthTab(tab) {
+      authModal.querySelectorAll('[data-auth-tab]').forEach(b => b.classList.toggle('active', b.dataset.authTab === tab));
+      authModal.querySelectorAll('.auth-form').forEach(f => {
+        f.hidden = f.dataset.form !== tab;
+        f.querySelector('.auth-msg').textContent = '';
+        f.querySelector('.auth-msg').classList.remove('is-ok');
+      });
+    }
+    // '비밀번호 재설정' 탭은 재설정 모달을 띄움 (로그인 칸에 적은 이메일은 그대로 옮겨줌)
+    authModal.querySelectorAll('[data-auth-tab]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.authTab === 'reset') {
+        openResetModal('request', authModal.querySelector('[data-form="login"] [name="email"]').value.trim());
+        return;
+      }
+      showAuthTab(b.dataset.authTab);
+    }));
+
+    function authMessage(form, text, ok) {
+      const msg = form.querySelector('.auth-msg');
+      msg.textContent = text;
+      msg.classList.toggle('is-ok', !!ok);
+    }
+    // 처리 중에는 제출 버튼을 잠가서 두 번 눌리지 않게
+    function setBusy(form, busy) {
+      const btn = form.querySelector('[type="submit"]');
+      btn.disabled = busy;
+      btn.style.opacity = busy ? 0.6 : '';
+    }
+    function authErrorText(error) {
+      const m = (error && error.message || '').toLowerCase();
+      if (m.includes('invalid login')) return '이메일 또는 비밀번호가 맞지 않아요';
+      if (m.includes('email not confirmed')) return '메일함에서 가입 인증 링크를 먼저 눌러주세요';
+      if (m.includes('already registered')) return '이미 가입된 이메일이에요';
+      if (m.includes('password')) return '비밀번호는 6자 이상이어야 해요';
+      if (m.includes('rate limit')) return '요청이 너무 많아요. 잠시 후 다시 시도해 주세요';
+      return '문제가 생겼어요: ' + (error && error.message || '알 수 없는 오류');
+    }
+    function noClient(form) {
+      authMessage(form, 'Supabase 에 연결하지 못했어요. 인터넷 연결을 확인해 주세요');
+    }
+
+    authModal.querySelector('[data-form="login"]').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target;
+      if (!sb) return noClient(f);
+      setBusy(f, true);
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: f.email.value.trim().toLowerCase(),
+        password: f.password.value,
+      });
+      setBusy(f, false);
+      if (error) { authMessage(f, authErrorText(error)); return; }
+      authUser = data.user;
+      f.reset();
+      closeModal(authModal);
+      renderAuthArea();
+      showToast(`✦ ${currentUser().name} 님, 다시 오신 걸 환영해요`);
+    });
+
+    authModal.querySelector('[data-form="signup"]').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target;
+      if (!sb) return noClient(f);
+      if (f.password.value.length < 6) { authMessage(f, '비밀번호는 6자 이상이어야 해요'); return; }
+      if (f.password.value !== f.password2.value) { authMessage(f, '비밀번호 확인이 일치하지 않아요'); return; }
+      setBusy(f, true);
+      const { data, error } = await sb.auth.signUp({
+        email: f.email.value.trim().toLowerCase(),
+        password: f.password.value,
+        options: { data: { name: f.name.value.trim() } },
+      });
+      setBusy(f, false);
+      if (error) { authMessage(f, authErrorText(error)); return; }
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        authMessage(f, '이미 가입된 이메일이에요. 로그인해 주세요');
+        return;
+      }
+      if (!data.session) {
+        // 이메일 인증을 켜 둔 프로젝트: 인증 메일의 링크를 눌러야 로그인 가능
+        authMessage(f, '✦ 가입 완료! 메일함에서 인증 링크를 누른 뒤 로그인해 주세요', true);
+        return;
+      }
+      authUser = data.user;
+      f.reset();
+      closeModal(authModal);
+      renderAuthArea();
+      showToast(`✦ 가입 완료! ${currentUser().name} 님의 옷장이 열렸어요`);
+    });
+
+    // #region 비밀번호 재설정 모달 (Supabase 기본 페이지로 나가지 않고 사이트 안에서 처리)
+    // 메일 링크가 돌아올 주소: 로컬 개발 서버(localhost:3000). 배포한 주소에서 열었으면 그 주소로
+    const LOCAL_SITE_URL = 'http://localhost:3000';
+    function resetRedirectUrl() {
+      const isLocal = location.protocol === 'file:' || ['localhost', '127.0.0.1', ''].includes(location.hostname);
+      return isLocal ? LOCAL_SITE_URL : location.origin + location.pathname;
+    }
+
+    const resetModal = document.getElementById('reset-modal');
+    function openResetModal(step, email) {
+      resetModal.querySelectorAll('[data-reset]').forEach(form => {
+        form.hidden = form.dataset.reset !== step;
+        form.querySelector('.auth-msg').textContent = '';
+        form.querySelector('.auth-msg').classList.remove('is-ok');
+      });
+      document.getElementById('reset-title').textContent = step === 'update' ? 'New Password' : 'Password Reset';
+      document.getElementById('reset-sub').textContent = step === 'update'
+        ? '새로 사용할 비밀번호를 입력해 주세요'
+        : '가입한 이메일로 재설정 링크를 보내드려요';
+      if (email) resetModal.querySelector('[data-reset="request"] [name="email"]').value = email;
+      closeModal(authModal);
+      openModal(resetModal);
+      const first = resetModal.querySelector(`[data-reset="${step}"] input`);
+      if (first) setTimeout(() => first.focus(), 50);
+    }
+
+    // 로그인 폼의 '비밀번호를 잊으셨나요?' → 재설정 모달 (적어둔 이메일은 그대로 옮겨줌)
+    document.getElementById('forgot-link').addEventListener('click', () => {
+      const typed = authModal.querySelector('[data-form="login"] [name="email"]').value.trim();
+      openResetModal('request', typed);
+    });
+    document.getElementById('back-to-login').addEventListener('click', () => {
+      closeModal(resetModal);
+      showAuthTab('login');
+      openModal(authModal);
+    });
+
+    resetModal.querySelector('[data-reset="request"]').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target;
+      if (!sb) return noClient(f);
+      setBusy(f, true);
+      const { error } = await sb.auth.resetPasswordForEmail(f.email.value.trim().toLowerCase(), {
+        redirectTo: resetRedirectUrl(),
+      });
+      setBusy(f, false);
+      if (error) { authMessage(f, authErrorText(error)); return; }
+      authMessage(f, '✦ 재설정 메일을 보냈어요. 메일함의 링크를 눌러 주세요', true);
+    });
+
+    resetModal.querySelector('[data-reset="update"]').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target;
+      if (!sb) return noClient(f);
+      if (f.password.value.length < 6) { authMessage(f, '비밀번호는 6자 이상이어야 해요'); return; }
+      if (f.password.value !== f.password2.value) { authMessage(f, '비밀번호 확인이 일치하지 않아요'); return; }
+      setBusy(f, true);
+      const { error } = await sb.auth.updateUser({ password: f.password.value });
+      setBusy(f, false);
+      if (error) { authMessage(f, authErrorText(error)); return; }
+      f.reset();
+      closeModal(resetModal);
+      // 주소창에 남은 재설정 토큰(#access_token=...) 정리
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      showToast('✦ 비밀번호를 바꿨어요. 새 비밀번호로 로그인돼 있어요');
+    });
+
+    // 메일 링크를 타고 돌아왔는데 링크가 만료/사용된 경우: 주소의 에러를 읽어서 안내
+    (function checkResetLinkError() {
+      const params = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
+      if (!params.get('error_code') && !params.get('error')) return;
+      history.replaceState(null, '', location.pathname);
+      openResetModal('request');
+      authMessage(resetModal.querySelector('[data-reset="request"]'),
+        params.get('error_code') === 'otp_expired'
+          ? '링크가 만료됐거나 이미 사용됐어요. 재설정 메일을 다시 받아 주세요'
+          : '재설정 링크에 문제가 있어요. 메일을 다시 받아 주세요');
+    })();
+    // #endregion
+
+    function renderAuthArea() {
+      const area = document.getElementById('auth-area');
+      const user = currentUser();
+      area.innerHTML = '';
+      const saved = document.createElement('button');
+      saved.type = 'button';
+      saved.id = 'saved-looks-btn';
+      saved.className = 'modal-btn is-small';
+      saved.innerHTML = '✦ Saved Looks <span class="saved-count">0</span>';
+      saved.addEventListener('click', () => openLookbook(null));
+      area.appendChild(saved);
+      if (user) {
+        // 로그인 상태: [✦ 유저이메일 (Logout)] 한 버튼 — 누르면 로그아웃
+        const out = document.createElement('button');
+        out.type = 'button';
+        out.className = 'modal-btn is-small auth-user-btn';
+        out.title = `${user.email} · 로그아웃`;
+        out.textContent = `✦ ${user.email} (Logout)`;
+        out.addEventListener('click', async () => {
+          if (sb) await sb.auth.signOut();
+          authUser = null;
+          renderAuthArea();
+          showToast('로그아웃했어요');
+        });
+        area.append(out);
+      } else {
+        const login = document.createElement('button');
+        login.type = 'button';
+        login.className = 'modal-btn is-small';
+        login.textContent = 'Login / Join';
+        login.addEventListener('click', () => { showAuthTab('login'); openModal(authModal); });
+        area.append(login);
+      }
+      updateSavedCount();
+    }
+
+    // 새로고침해도 로그인 유지: Supabase 가 저장해 둔 세션을 불러오고, 바뀔 때마다 헤더 갱신
+    if (sb) {
+      sb.auth.onAuthStateChange((event, session) => {
+        authUser = session ? session.user : null;
+        renderAuthArea();
+        // 이 콜백 안에서 바로 Supabase 를 다시 부르면 멈출 수 있어서 한 박자 뒤에 실행
+        if (authUser && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+          setTimeout(syncLooksWithSupabase, 0);
+        }
+        // 재설정 메일 링크로 돌아오면 사이트 안의 '새 비밀번호' 모달을 띄움
+        if (event === 'PASSWORD_RECOVERY') openResetModal('update');
+      });
+    }
+
+    // Supabase 오류를 사람이 읽을 수 있는 안내로
+    function dbErrorText(error) {
+      const msg = (error && (error.message || String(error))) || '';
+      const code = (error && error.code) || '';
+      if (!navigator.onLine || /failed to fetch|network/i.test(msg)) return '인터넷 연결을 확인해 주세요';
+      if (code === '42P01' || code === 'PGRST205' || /does not exist|could not find the table/i.test(msg)) {
+        return 'Supabase 에 saved_looks 테이블이 없어요 (supabase/saved_looks.sql 실행 필요)';
+      }
+      if (code === '42501' || /row-level security/i.test(msg)) return '권한(RLS) 설정 때문에 막혔어요. saved_looks.sql 의 정책을 확인해 주세요';
+      if (code === 'PGRST204' || /column/i.test(msg)) return '테이블 컬럼이 코드와 달라요 (title · items · total_price 확인)';
+      if (/jwt|token|401/i.test(msg)) return '로그인이 만료됐어요. 다시 로그인해 주세요';
+      return msg || '알 수 없는 오류';
+    }
+
+    // 룩을 Supabase saved_looks 테이블에 저장 (RLS 로 본인 행만 쓰기 가능) → 새 행 id 를 돌려줌
+    async function saveLookToSupabase(look) {
+      if (!sb || !authUser) return { skipped: true };
+      try {
+        const { data, error } = await sb.from('saved_looks').insert({
+          user_id: authUser.id,
+          title: look.title,
+          items: look.items,
+          total_price: look.total,
+        }).select('id').single();
+        return { error, id: data ? data.id : null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+
+    // 로그인하면 계정에 저장된 룩을 이 브라우저 보관함과 맞춤
+    //  - 다른 기기에서 저장한 룩은 가져오고, 다른 곳에서 지운 룩은 여기서도 지움
+    //  - 네트워크 오류로 계정에 못 올라간 룩(dbId 없음)은 다시 올림
+    let syncingLooks = null;
+    function syncLooksWithSupabase() {
+      if (!sb || !authUser) return Promise.resolve();
+      if (syncingLooks) return syncingLooks;
+      syncingLooks = (async () => {
+        try {
+          const { data: rows, error } = await sb.from('saved_looks')
+            .select('id, title, items, total_price, created_at')
+            .order('created_at', { ascending: true });
+          if (error) { showToast('계정 룩을 불러오지 못했어요: ' + dbErrorText(error), 4500); return; }
+
+          const dbIds = new Set(rows.map(r => r.id));
+          let list = readArchive().filter(l => !l.dbId || dbIds.has(l.dbId));
+          const known = new Set(list.map(l => l.dbId).filter(Boolean));
+          rows.forEach(r => {
+            if (known.has(r.id)) return;
+            const d = new Date(r.created_at);
+            const items = Array.isArray(r.items) ? r.items : [];
+            list.push({
+              id: 'db-' + r.id,
+              dbId: r.id,
+              number: parseInt(String(r.title).replace(/\D/g, ''), 10) || 0,
+              title: r.title,
+              dateLabel: lookDateParts(d).label,
+              fileName: `mori-archive-${lookDateParts(d).file}.png`,
+              savedAt: r.created_at,
+              total: r.total_price,
+              itemIds: items.map(i => i.id),
+              items,
+              snapshot: null,
+            });
+          });
+          for (const look of list.filter(l => !l.dbId)) {
+            const res = await saveLookToSupabase(look);
+            if (!res.error && res.id) look.dbId = res.id;
+          }
+          list.sort((a, b) => String(a.savedAt).localeCompare(String(b.savedAt)));
+          writeArchive(list);
+          updateSavedCount();
+          const modal = document.getElementById('lookbook-modal');
+          if (!modal.hidden) renderArchiveGrid(null);
+        } catch (e) {
+          showToast('계정 룩을 불러오지 못했어요: ' + dbErrorText(e), 4500);
+        } finally {
+          syncingLooks = null;
+        }
+      })();
+      return syncingLooks;
+    }
+
+    // 계정에서 룩 삭제 (dbId 가 있는 룩만). 성공하면 true
+    async function deleteLooksFromSupabase(looks) {
+      const ids = looks.map(l => l.dbId).filter(Boolean);
+      if (!ids.length || !sb || !authUser) return true;
+      try {
+        const { error } = await sb.from('saved_looks').delete().in('id', ids);
+        if (error) { showToast('계정에서 삭제하지 못했어요: ' + dbErrorText(error), 4500); return false; }
+        return true;
+      } catch (e) {
+        showToast('계정에서 삭제하지 못했어요: ' + dbErrorText(e), 4500);
+        return false;
+      }
+    }
+    // #endregion
+
+    // 헤더 [✦ Saved Looks (N)] 숫자 갱신 (로그인한 계정 / 게스트 보관함 기준)
+    function updateSavedCount() {
+      const badge = document.querySelector('#saved-looks-btn .saved-count');
+      if (badge) badge.textContent = readJSON(archiveKey(), []).length;
+    }
+
+    // #region 코디 저장 · 룩북 아카이브
+    function archiveKey() {
+      const user = currentUser();
+      return 'mori_lookbook_' + (user ? user.email : 'guest');
+    }
+    function readArchive() { return readJSON(archiveKey(), []); }
+    function writeArchive(list) { return writeJSON(archiveKey(), list); }
+
+    function lookDateParts(d) {
+      const pad = n => String(n).padStart(2, '0');
+      return {
+        file: `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`,
+        label: `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`,
+      };
+    }
+
+    // 코디북을 그대로 PNG 로 그림 (배경 + 옷 이미지의 위치·기울기·종이 테두리)
+    function renderBoardCanvas() {
+      const board = document.getElementById('layering-board');
+      const W = board.clientWidth, H = board.clientHeight, S = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = W * S;
+      canvas.height = H * S;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(S, S);
+      const bg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, H * 1.1);
+      bg.addColorStop(0, '#fffdf9');
+      bg.addColorStop(0.55, '#faf5ee');
+      bg.addColorStop(1, '#f3ece2');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const order = ['bottom', 'top', 'bag', 'headwear'];   // 화면과 같은 겹침 순서
+      order.forEach(cat => {
+        const slot = document.getElementById(`slot-${cat}`);
+        if (!slot.classList.contains('is-filled')) return;
+        const filled = slot.querySelector('.slot-filled');
+        const img = filled.querySelector('.slot-img');
+        if (!img.complete || !img.naturalWidth) return;
+        const cs = getComputedStyle(filled);
+        const m = new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform);
+        const [ox, oy] = cs.transformOrigin.split(' ').map(parseFloat);
+        ctx.save();
+        ctx.translate(slot.offsetLeft + ox, slot.offsetTop + oy);
+        ctx.transform(m.a, m.b, m.c, m.d, m.e, m.f);
+        ctx.translate(-ox, -oy);
+        if (slot.classList.contains('no-cut')) {
+          ctx.globalCompositeOperation = 'multiply';
+        } else {
+          ctx.filter = 'sepia(0.08) saturate(0.94) drop-shadow(1.5px 0 0 #fffdf8) drop-shadow(-1.5px 0 0 #fffdf8) drop-shadow(0 1.5px 0 #fffdf8) drop-shadow(0 -1.5px 0 #fffdf8) drop-shadow(1px 3px 3px rgba(70,50,40,0.22))';
+        }
+        ctx.drawImage(img, img.offsetLeft, img.offsetTop, img.offsetWidth, img.offsetHeight);
+        ctx.restore();
+      });
+      return canvas;
+    }
+
+    function downloadDataUrl(dataUrl, filename) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function linkLines(items) {
+      return items.map(i => `${SLOT_LABELS[i.category]} | ${i.brand} ${i.name} | ${i.price} | ${i.musinsaUrl || '(링크 없음)'}`);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      showToast('✦ 착장 링크를 복사했어요. 카톡·메모장에 붙여넣기 하세요');
+    }
+
+    function openAllLinks(items) {
+      const urls = items.map(i => i.musinsaUrl).filter(Boolean);
+      let blocked = 0;
+      urls.forEach(u => { if (!window.open(u, '_blank', 'noopener')) blocked++; });
+      if (blocked) showToast('브라우저가 팝업을 막았어요. 주소창 오른쪽에서 팝업 허용을 눌러주세요');
+    }
+
+    // 썸네일: PNG 스냅샷이 있으면 그것, 없으면(로컬 파일 보안 제한) 아이템 사진 모음
+    function thumbElement(look) {
+      const box = document.createElement('div');
+      box.className = 'look-thumb';
+      if (look.snapshot) {
+        const img = document.createElement('img');
+        img.className = 'look-snapshot';
+        img.src = look.snapshot;
+        img.alt = look.title;
+        box.appendChild(img);
+      } else {
+        const grid = document.createElement('div');
+        grid.className = 'look-collage';
+        look.items.forEach(i => {
+          const img = document.createElement('img');
+          img.src = i.image;
+          img.alt = i.name;
+          grid.appendChild(img);
+        });
+        box.appendChild(grid);
+      }
+      return box;
+    }
+
+    function itemsFromIds(ids) {
+      return ids.map(id => PRODUCTS.find(p => String(p.id) === String(id))).filter(Boolean);
+    }
+
+    // 저장 당시 아이템 정보(look.items)를 우선 쓰되, 상품 목록에 있으면 최신 정보(이미지 등)로
+    function itemsForLook(look) {
+      if (look.items && look.items.length) {
+        return look.items.map(s => PRODUCTS.find(p => String(p.id) === String(s.id)) || s);
+      }
+      return itemsFromIds(look.itemIds || []);
+    }
+
+    function renderCurrentLook(look) {
+      const wrap = document.getElementById('look-current-wrap');
+      wrap.innerHTML = '';
+      if (!look) return;
+      const items = itemsForLook(look);
+      const total = items.reduce((s, i) => s + priceNumber(i.price), 0);
+
+      const sec = document.createElement('div');
+      sec.className = 'look-current';
+      sec.appendChild(thumbElement({ ...look, items }));
+
+      const right = document.createElement('div');
+      const ul = document.createElement('ul');
+      ul.className = 'look-items';
+      items.forEach(i => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${i.image}" alt="">
+          <div>
+            <span class="li-cat">${i.category.toUpperCase()} · ${i.brand}</span>
+            <span class="li-name"></span>
+            <span class="li-price">${i.price}</span>
+          </div>`;
+        li.querySelector('.li-name').textContent = i.name;
+        if (i.musinsaUrl) {
+          const a = document.createElement('a');
+          a.className = 'modal-btn is-small';
+          a.href = i.musinsaUrl;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = '구매처 보러가기 ↗';
+          li.appendChild(a);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'li-price';
+          span.textContent = '링크 없음';
+          li.appendChild(span);
+        }
+        ul.appendChild(li);
+      });
+
+      const totalLine = document.createElement('div');
+      totalLine.className = 'look-total-line';
+      totalLine.innerHTML = `<span>TOTAL ARCHIVE:</span><strong>${formatWon(total)}</strong>`;
+
+      const actions = document.createElement('div');
+      actions.className = 'look-actions';
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'modal-btn is-primary';
+      copyBtn.textContent = '✦ 착장 링크 전체 복사';
+      copyBtn.addEventListener('click', () =>
+        copyText(`✦ ${look.title} · ${look.dateLabel}\n` + linkLines(items).join('\n') + `\nTOTAL ${formatWon(total)}`));
+      const openBtn = document.createElement('button');
+      openBtn.type = 'button';
+      openBtn.className = 'modal-btn';
+      openBtn.textContent = '모든 상품 페이지 한 번에 열기';
+      openBtn.addEventListener('click', () => openAllLinks(items));
+      actions.append(copyBtn, openBtn);
+      if (look.snapshot) {
+        const dl = document.createElement('button');
+        dl.type = 'button';
+        dl.className = 'modal-btn';
+        dl.textContent = 'PNG 다시 받기';
+        dl.addEventListener('click', () => downloadDataUrl(look.snapshot, look.fileName));
+        actions.appendChild(dl);
+      }
+
+      right.append(ul, totalLine, actions);
+      sec.appendChild(right);
+      wrap.appendChild(sec);
+      document.getElementById('lookbook-sub').textContent = `${look.title} · ${look.dateLabel}`;
+    }
+
+    function renderArchiveGrid(activeId) {
+      const grid = document.getElementById('archive-grid');
+      const list = readArchive();
+      grid.innerHTML = '';
+      document.getElementById('archive-clear').hidden = list.length === 0;
+      if (!list.length) {
+        grid.innerHTML = `
+          <div class="empty-state is-archive">
+            <span class="empty-mark" aria-hidden="true">✦</span>
+            <p class="empty-title">아직 비어 있는 아카이브예요</p>
+            <p class="empty-text">코디북에 옷을 올리고 <em>save me!</em> 를 눌러<br>첫 번째 룩을 남겨 보세요</p>
+            <button type="button" class="empty-btn" data-close>옷 고르러 가기</button>
+          </div>`;
+        return;
+      }
+      list.slice().reverse().forEach(look => {
+        const items = itemsForLook(look);
+        const card = document.createElement('div');
+        card.className = 'archive-card';
+        if (look.id === activeId) card.style.borderColor = '#3a302e';
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'modal-btn is-small is-danger';
+        del.title = '이 코디 삭제';
+        del.setAttribute('aria-label', `${look.title} 삭제`);
+        del.textContent = '🗑️ 삭제';
+        del.addEventListener('click', async () => {
+          del.disabled = true;
+          if (!(await deleteLooksFromSupabase([look]))) { del.disabled = false; return; }
+          writeArchive(readArchive().filter(l => l.id !== look.id));
+          if (look.id === activeId) renderCurrentLook(null);
+          renderArchiveGrid(activeId);
+          updateSavedCount();
+          showToast(`${look.title}을(를) 삭제했어요`);
+        });
+
+        const title = document.createElement('p');
+        title.textContent = `${look.title} · ${look.dateLabel}`;
+        const total = document.createElement('p');
+        total.className = 'ac-total';
+        total.textContent = 'TOTAL ' + formatWon(items.reduce((s, i) => s + priceNumber(i.price), 0));
+
+        const btns = document.createElement('div');
+        btns.className = 'ac-buttons';
+        const view = document.createElement('button');
+        view.type = 'button';
+        view.className = 'modal-btn is-small';
+        view.textContent = '구매 링크 모아보기';
+        view.addEventListener('click', () => { renderCurrentLook(look); renderArchiveGrid(look.id); });
+        const wear = document.createElement('button');
+        wear.type = 'button';
+        wear.className = 'modal-btn is-small';
+        wear.textContent = '다시 캔버스에 불러오기';
+        wear.addEventListener('click', () => {
+          SLOT_ORDER.forEach(unwearSlot);
+          items.forEach(wearItem);
+          closeModal(document.getElementById('lookbook-modal'));
+          showToast(`${look.title}을(를) 캔버스에 불러왔어요`);
+        });
+        btns.append(wear, view, del);
+
+        card.append(thumbElement({ ...look, items }), title, total, btns);
+        grid.appendChild(card);
+      });
+    }
+
+    function openLookbook(look) {
+      renderCurrentLook(look || null);
+      if (!look) document.getElementById('lookbook-sub').textContent = 'SAVED ARCHIVES';
+      renderArchiveGrid(look ? look.id : null);
+      openModal(document.getElementById('lookbook-modal'));
+    }
+
+    document.getElementById('archive-clear').addEventListener('click', async () => {
+      const all = readArchive();
+      if (!all.length) return;
+      if (!confirm(currentUser() ? '저장한 코디를 모두 삭제할까요? (내 계정에서도 지워져요)' : '저장한 코디를 모두 삭제할까요?')) return;
+      if (!(await deleteLooksFromSupabase(all))) return;
+      writeArchive([]);
+      renderCurrentLook(null);
+      document.getElementById('lookbook-sub').textContent = 'SAVED ARCHIVES';
+      renderArchiveGrid(null);
+      updateSavedCount();
+      showToast('저장한 코디를 모두 삭제했어요');
+    });
+
+    document.getElementById('archive-btn').addEventListener('click', () => openLookbook(null));
+
+    document.getElementById('reset-filters').addEventListener('click', () => {
+      forYouOnly = false;
+      updateForYouBar();
+      selectedBrand = 'all';
+      document.querySelector('#category-tabs button[data-category="all"]').click();
+      document.querySelector('#mood-filter button[data-mood="all"]').click();
+    });
+    document.getElementById('board-jump').addEventListener('click', () => {
+      document.getElementById('layering-board').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    document.getElementById('save-me-btn').addEventListener('click', () => document.getElementById('save-btn').click());
+    document.getElementById('board-clear-btn').addEventListener('click', () => {
+      SLOT_ORDER.forEach(unwearSlot);
+      showToast('코디북을 비웠어요');
+    });
+
+    let savingLook = false;
+    function setSaving(on) {
+      savingLook = on;
+      ['save-btn', 'save-me-btn'].forEach(id => {
+        const b = document.getElementById(id);
+        b.disabled = on;
+        b.classList.toggle('is-saving', on);
+      });
+    }
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      if (savingLook) return;   // 저장 중 두 번 눌러도 한 번만
+      // 빈 캔버스 방어: 모자·상의·하의 중 최소 1개 (가방만 있는 건 저장하지 않음)
+      const items = wornItems();
+      if (!items.some(i => i.category !== 'bag')) {
+        showToast('최소 1개 이상의 아이템(상의/하의 등)을 먼저 매치해 주세요 ✦');
+        return;
+      }
+      setSaving(true);
+      try {
+        const list = readArchive();
+        const number = (list.reduce((m, l) => Math.max(m, l.number || 0), 0)) + 1;
+        const now = new Date();
+        const date = lookDateParts(now);
+        const look = {
+          id: 'look-' + now.getTime(),
+          number,
+          title: `Archive #${String(number).padStart(2, '0')}`,
+          dateLabel: date.label,
+          fileName: `mori-archive-${date.file}.png`,
+          savedAt: now.toISOString(),
+          total: items.reduce((s, i) => s + priceNumber(i.price), 0),
+          itemIds: items.map(i => i.id),
+          items: items.map(i => ({ id: i.id, category: i.category, brand: i.brand, name: i.name, price: i.price, image: i.image, musinsaUrl: i.musinsaUrl })),
+          snapshot: null,
+        };
+
+        // 옷 사진이 아직 다 안 불러와졌으면 기다렸다가 그림
+        await Promise.all([...document.querySelectorAll('#layering-board .slot.is-filled .slot-img')].map(img =>
+          img.complete && img.naturalWidth ? Promise.resolve() : new Promise(resolve => {
+            img.addEventListener('load', resolve, { once: true });
+            img.addEventListener('error', resolve, { once: true });
+            setTimeout(resolve, 4000);
+          })));
+        layoutAll();
+
+        // PNG 저장 (로컬 파일로 열면 브라우저 보안 때문에 막힐 수 있음 → 그땐 링크·목록만 저장)
+        try {
+          const canvas = renderBoardCanvas();
+          const full = canvas.toDataURL('image/png');
+          downloadDataUrl(full, look.fileName);
+          const t = document.createElement('canvas');
+          t.width = 300;
+          t.height = Math.round(300 * canvas.height / canvas.width);
+          t.getContext('2d').drawImage(canvas, 0, 0, t.width, t.height);
+          look.snapshot = t.toDataURL('image/jpeg', 0.82);
+        } catch (e) {
+          showToast('로컬 파일로 열어서 PNG 저장이 막혔어요. Live Server 등으로 열면 이미지도 저장돼요');
+        }
+
+        list.push(look);
+        if (!writeArchive(list)) {
+          look.snapshot = null;   // 저장 공간 부족 시 썸네일 없이 저장
+          list[list.length - 1] = look;
+          writeArchive(list);
+        }
+        updateSavedCount();
+        openLookbook(look);
+
+        // 로그인한 유저면 Supabase saved_looks 테이블에도 저장
+        if (!currentUser()) {
+          showToast('✦ 이 브라우저에 저장했어요. 로그인하면 내 계정에도 저장돼요', 3500);
+          return;
+        }
+        const { error, id } = await saveLookToSupabase(look);
+        if (error) {
+          // 이 브라우저에는 이미 저장돼 있고, 다음 로그인 때 계정으로 다시 올라감
+          showToast('계정 저장 실패: ' + dbErrorText(error) + ' (이 브라우저에는 저장됐어요)', 5000);
+          return;
+        }
+        const saved = readArchive();
+        const mine = saved.find(l => l.id === look.id);
+        if (mine) { mine.dbId = id; writeArchive(saved); }
+        showToast(`✦ ${look.title} 을(를) 내 계정에 저장했어요`);
+      } finally {
+        setSaving(false);
+      }
+    });
+
+    renderAuthArea();
+    // #endregion
+
+    // 스크롤하면 상단바에 옅은 구분선
+    window.addEventListener('scroll', () => {
+      document.querySelector('#main-app > header').classList.toggle('is-scrolled', window.scrollY > 4);
+    }, { passive: true });
+
+    // 상단 MUSH ROOM 글자를 누르면 페이지 맨 위로
+    document.getElementById('home-link').addEventListener('click', e => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // #region 개발용 치트키 & 처음 실행
+    // [개발용 치트키 실행 함수]
+    function devDirectSkip() {
+      introScreen.hidden = true;
+      quizScreen.hidden = true;
+      mainApp.hidden = false;
+      mainApp.classList.add('fade-in');
+      renderProductItems();
+    }
+
+    // 초기 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      renderBrands('all');
+      renderProductItems();
+    });
+    // #endregion
+
+    // #region 마우스 하트 트레일
+    (() => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const colors = ["#ffffff", "#f4f5f8", "#e3e6ec", "#cfd3db"];
+      const hearts = ["♡"];
+      let lastTime = 0;
+
+      window.addEventListener("pointermove", (e) => {
+        const now = performance.now();
+        if (now - lastTime < 40) return;
+        lastTime = now;
+
+        const heart = document.createElement("span");
+        heart.className = "cursor-heart";
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = e.clientX + "px";
+        heart.style.top = e.clientY + "px";
+        heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+        heart.style.fontSize = (10 + Math.random() * 10) + "px";
+        heart.style.setProperty("--dx", (Math.random() * 40 - 20) + "px");
+        heart.style.setProperty("--dy", (Math.random() * -30 - 10) + "px");
+        heart.style.setProperty("--rot", (Math.random() * 60 - 30) + "deg");
+        heart.addEventListener("animationend", () => heart.remove());
+        document.body.appendChild(heart);
+      });
+    })();
+    // #endregion
+  </script>
+
+</body>
+</html>
+                                                                                                              
