@@ -1658,7 +1658,8 @@
       letter-spacing: 0.08em;
     }
     .auth-form input,
-    .auth-form select {
+    .auth-form select,
+    .auth-form textarea {
       display: block;
       width: 100%;
       box-sizing: border-box;
@@ -1671,7 +1672,28 @@
       font: inherit;
       font-size: 14px;
     }
+    .auth-form textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
     .auth-form .modal-btn { width: 100%; margin-top: 6px; padding: 10px 0; }
+    /* 하단 링크: 브랜드 입점 신청 · 문의 */
+    .footer-links { margin: 0 0 6px; }
+    .footer-links button {
+      padding: 0;
+      border: none;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    .footer-links button:hover { opacity: 0.6; }
+    #auth-area .admin-link {
+      white-space: nowrap;
+      border-color: #3a302e;
+      background: #3a302e;
+      color: #f6efe3;
+    }
+    #auth-area .admin-link:hover { background: #b8959b; border-color: #b8959b; }
     .auth-msg {
       min-height: 18px;
       margin: 8px 0 0;
@@ -2204,6 +2226,11 @@
     </div>
 
     <footer>
+      <p class="footer-links">
+        <button type="button" id="brand-apply-link">Brand 입점 신청</button>
+        &nbsp;·&nbsp;
+        <button type="button" id="contact-link">문의 · 컴플레인</button>
+      </p>
       <p class="footer-mood">✦ MUSH ROOM — A Dreamy Silhouette Room inspired by K-Designers</p>
       <p class="disclaimer">
         This is a non-commercial styling study project.
@@ -2287,6 +2314,48 @@
         <label>새 비밀번호 (6자 이상) <input type="password" name="password" minlength="6" autocomplete="new-password" required></label>
         <label>새 비밀번호 확인 <input type="password" name="password2" minlength="6" autocomplete="new-password" required></label>
         <button type="submit" class="modal-btn is-primary">비밀번호 변경하기</button>
+        <p class="auth-msg"></p>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="brand-modal" hidden>
+    <div class="modal-card is-small" role="dialog" aria-modal="true" aria-labelledby="brand-title">
+      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
+      <h2 class="modal-title" id="brand-title">Brand 입점 신청</h2>
+      <p class="modal-sub">MUSH ROOM 에 함께할 브랜드를 기다려요. 검토 후 이메일로 연락드려요</p>
+      <form class="auth-form">
+        <label>브랜드명 <input type="text" name="brand_name" maxlength="60" required></label>
+        <label>담당자 이름 <input type="text" name="contact_name" maxlength="30" required></label>
+        <label>연락 이메일 <input type="email" name="email" autocomplete="email" required></label>
+        <label>인스타그램 (선택) <input type="text" name="instagram" maxlength="80" placeholder="@brand"></label>
+        <label>웹사이트 (선택) <input type="text" name="website" maxlength="200" placeholder="https://"></label>
+        <label>주요 카테고리
+          <select name="category">
+            <option>상의</option><option>하의</option><option>가방</option><option>모자 · 액세서리</option><option>여러 카테고리</option>
+          </select>
+        </label>
+        <label>브랜드 소개 <textarea name="message" maxlength="2000" required placeholder="브랜드 무드, 대표 아이템 등을 알려주세요"></textarea></label>
+        <button type="submit" class="modal-btn is-primary">입점 신청하기</button>
+        <p class="auth-msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="contact-modal" hidden>
+    <div class="modal-card is-small" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
+      <h2 class="modal-title" id="contact-title">문의 · 컴플레인</h2>
+      <p class="modal-sub">불편했던 점을 남겨 주시면 확인 후 이메일로 답변드려요</p>
+      <form class="auth-form">
+        <label>답변 받을 이메일 <input type="email" name="email" autocomplete="email" required></label>
+        <label>유형
+          <select name="category">
+            <option>상품 정보 · 가격</option><option>사이트 오류</option><option>계정 · 로그인</option><option>저작권 · 브랜드</option><option>기타</option>
+          </select>
+        </label>
+        <label>제목 <input type="text" name="subject" maxlength="100" required></label>
+        <label>내용 <textarea name="message" maxlength="3000" required></textarea></label>
+        <button type="submit" class="modal-btn is-primary">보내기</button>
         <p class="auth-msg"></p>
       </form>
     </div>
@@ -3216,6 +3285,7 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_H-aBpL-frMMKmx89VpaqhA_CXiM4Sec';
     const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) : null;
     let authUser = null;   // 로그인한 Supabase 유저 (없으면 null)
+    let authProfile = null;   // { role, status } — profiles 테이블(admin.sql)이 없으면 null (승인 절차 없이 사용)
 
     function readJSON(key, fallback) {
       try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (e) { return fallback; }
@@ -3223,6 +3293,67 @@
     function writeJSON(key, value) {
       try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
     }
+    // 가입 승인 상태 불러오기 (profiles 테이블)
+    async function loadProfile() {
+      authProfile = null;
+      if (!sb || !authUser) return null;
+      try {
+        const { data, error } = await sb.from('profiles').select('role, status').eq('id', authUser.id).maybeSingle();
+        if (error) return null;   // 테이블이 아직 없으면 승인 절차 없이 그대로 사용
+        authProfile = data || { role: 'user', status: 'pending' };
+      } catch (e) { /* 네트워크 오류: 계정 저장은 서버(RLS)가 다시 막아줌 */ }
+      return authProfile;
+    }
+    function isApproved() { return !!authUser && (!authProfile || authProfile.status === 'approved'); }
+    // 관리자: DB(profiles.role) 에서 admin 이거나, 운영자 이메일로 로그인한 경우 → 헤더에 Admin 버튼
+    // (버튼만 보여주는 것. 실제 데이터 조회·변경 권한은 Supabase RLS 가 DB 의 role 로 다시 확인함)
+    const ADMIN_EMAILS = ['lsyio1234@gmail.com'];
+    function isAdmin() {
+      if (!authUser) return false;
+      if (authProfile && authProfile.role === 'admin') return true;
+      return ADMIN_EMAILS.includes(String(authUser.email || '').toLowerCase());
+    }
+
+    // 관리자 계정은 사이트에 들어오면 관리자 페이지로 바로 이동
+    //  - 관리자 페이지의 '사이트로'(index.html?site=1)로 온 경우엔 이 탭에서는 일반 화면 그대로 보기
+    //  - 비밀번호 재설정 메일 링크로 온 경우엔 이동하지 않음
+    const adminViewingSite = (() => {
+      try {
+        if (new URLSearchParams(location.search).has('site')) sessionStorage.setItem('mr_admin_site', '1');
+        return sessionStorage.getItem('mr_admin_site') === '1';
+      } catch (e) { return false; }
+    })();
+    const cameFromRecovery = /type=recovery/.test(location.hash);
+    function goAdminIfNeeded(fromLogin) {
+      if (!isAdmin() || cameFromRecovery) return false;
+      if (!fromLogin && adminViewingSite) return false;
+      if (!document.getElementById('reset-modal').hidden) return false;
+      location.href = 'admin.html';
+      return true;
+    }
+
+    // 로그인 직후 · 새로고침 때: 거절된 계정은 로그아웃, 대기 중이면 계정 저장 잠금, 승인이면 동기화
+    async function applyProfile(fromLogin) {
+      await loadProfile();
+      if (authProfile && authProfile.status === 'rejected') {
+        if (sb) await sb.auth.signOut();
+        authUser = null;
+        authProfile = null;
+        renderAuthArea();
+        showToast('가입이 승인되지 않은 계정이에요. 하단 문의 · 컴플레인으로 연락해 주세요', 5000);
+        return 'rejected';
+      }
+      renderAuthArea();
+      if (!authUser) return 'none';
+      if (authProfile && authProfile.status === 'pending') {
+        if (fromLogin) showToast('✦ 가입 승인 대기 중이에요. 승인 전까지 룩은 이 브라우저에만 저장돼요', 4500);
+        return 'pending';
+      }
+      if (goAdminIfNeeded(fromLogin)) return 'admin';
+      syncLooksWithSupabase();
+      return 'approved';
+    }
+
     function currentUser() {
       if (!authUser) return null;
       const meta = authUser.user_metadata || {};
@@ -3283,10 +3414,12 @@
       setBusy(f, false);
       if (error) { authMessage(f, authErrorText(error)); return; }
       authUser = data.user;
+      const status = await applyProfile(true);
+      if (status === 'rejected') { authMessage(f, '가입이 승인되지 않은 계정이에요'); return; }
+      if (status === 'admin') { authMessage(f, '✦ 관리자 페이지로 이동할게요', true); return; }
       f.reset();
       closeModal(authModal);
-      renderAuthArea();
-      showToast(`✦ ${currentUser().name} 님, 다시 오신 걸 환영해요`);
+      if (status !== 'pending' && currentUser()) showToast(`✦ ${currentUser().name} 님, 다시 오신 걸 환영해요`);
     });
 
     authModal.querySelector('[data-form="signup"]').addEventListener('submit', async e => {
@@ -3309,14 +3442,16 @@
       }
       if (!data.session) {
         // 이메일 인증을 켜 둔 프로젝트: 인증 메일의 링크를 눌러야 로그인 가능
-        authMessage(f, '✦ 가입 완료! 메일함에서 인증 링크를 누른 뒤 로그인해 주세요', true);
+        authMessage(f, '✦ 가입 신청 완료! 메일 인증 후 로그인해 주세요. 관리자 승인 후 계정 저장이 열려요', true);
         return;
       }
       authUser = data.user;
+      const status = await applyProfile(false);
       f.reset();
       closeModal(authModal);
-      renderAuthArea();
-      showToast(`✦ 가입 완료! ${currentUser().name} 님의 옷장이 열렸어요`);
+      showToast(status === 'pending'
+        ? '✦ 가입 신청 완료! 관리자 승인 후 내 계정에도 룩이 저장돼요'
+        : `✦ 가입 완료! ${currentUser().name} 님의 옷장이 열렸어요`, 4500);
     });
 
     // #region 비밀번호 재설정 모달 (Supabase 기본 페이지로 나가지 않고 사이트 안에서 처리)
@@ -3412,14 +3547,23 @@
       area.appendChild(saved);
       if (user) {
         // 로그인 상태: [✦ 유저이메일 (Logout)] 한 버튼 — 누르면 로그아웃
+        if (isAdmin()) {
+          const admin = document.createElement('a');
+          admin.className = 'modal-btn is-small admin-link';
+          admin.href = 'admin.html';
+          admin.textContent = '✦ Admin';
+          area.appendChild(admin);
+        }
+        const pending = authProfile && authProfile.status === 'pending';
         const out = document.createElement('button');
         out.type = 'button';
         out.className = 'modal-btn is-small auth-user-btn';
-        out.title = `${user.email} · 로그아웃`;
-        out.textContent = `✦ ${user.email} (Logout)`;
+        out.title = `${user.email}${pending ? ' · 가입 승인 대기 중' : ''} · 로그아웃`;
+        out.textContent = `✦ ${user.email}${pending ? ' · 승인 대기' : ''} (Logout)`;
         out.addEventListener('click', async () => {
           if (sb) await sb.auth.signOut();
           authUser = null;
+          authProfile = null;
           renderAuthArea();
           showToast('로그아웃했어요');
         });
@@ -3439,10 +3583,12 @@
     if (sb) {
       sb.auth.onAuthStateChange((event, session) => {
         authUser = session ? session.user : null;
+        if (!authUser) authProfile = null;
         renderAuthArea();
         // 이 콜백 안에서 바로 Supabase 를 다시 부르면 멈출 수 있어서 한 박자 뒤에 실행
+        // (승인 상태 확인 → 승인된 계정만 룩 동기화)
         if (authUser && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
-          setTimeout(syncLooksWithSupabase, 0);
+          setTimeout(() => applyProfile(false), 0);
         }
         // 재설정 메일 링크로 돌아오면 사이트 안의 '새 비밀번호' 모달을 띄움
         if (event === 'PASSWORD_RECOVERY') openResetModal('update');
@@ -3465,7 +3611,7 @@
 
     // 룩을 Supabase saved_looks 테이블에 저장 (RLS 로 본인 행만 쓰기 가능) → 새 행 id 를 돌려줌
     async function saveLookToSupabase(look) {
-      if (!sb || !authUser) return { skipped: true };
+      if (!sb || !authUser || !isApproved()) return { skipped: true };
       try {
         const { data, error } = await sb.from('saved_looks').insert({
           user_id: authUser.id,
@@ -3484,7 +3630,7 @@
     //  - 네트워크 오류로 계정에 못 올라간 룩(dbId 없음)은 다시 올림
     let syncingLooks = null;
     function syncLooksWithSupabase() {
-      if (!sb || !authUser) return Promise.resolve();
+      if (!sb || !authUser || !isApproved()) return Promise.resolve();
       if (syncingLooks) return syncingLooks;
       syncingLooks = (async () => {
         try {
@@ -3545,6 +3691,62 @@
         return false;
       }
     }
+    // #endregion
+
+    // #region 브랜드 입점 신청 · 문의/컴플레인 (비로그인도 보낼 수 있음 → 관리자 페이지에서 처리)
+    function formErrorText(error) {
+      const msg = (error && (error.message || String(error))) || '';
+      const code = (error && error.code) || '';
+      if (code === '42P01' || code === 'PGRST205' || /does not exist|could not find the table/i.test(msg)) {
+        return '아직 접수 준비가 안 됐어요 (supabase/admin.sql 실행 필요)';
+      }
+      return dbErrorText(error);
+    }
+    function openFormModal(modal) {
+      const form = modal.querySelector('form');
+      authMessage(form, '');
+      if (currentUser() && !form.email.value) form.email.value = currentUser().email;
+      openModal(modal);
+      setTimeout(() => form.querySelector('input').focus(), 50);
+    }
+    function bindRequestForm(modal, table, toRow, okText) {
+      modal.querySelector('form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        if (!sb) return noClient(form);
+        setBusy(form, true);
+        try {
+          const { error } = await sb.from(table).insert(toRow(form));
+          if (error) { authMessage(form, '보내지 못했어요: ' + formErrorText(error)); return; }
+          form.reset();
+          authMessage(form, okText, true);
+        } catch (err) {
+          authMessage(form, '보내지 못했어요: ' + formErrorText(err));
+        } finally {
+          setBusy(form, false);
+        }
+      });
+    }
+    const brandModal = document.getElementById('brand-modal');
+    const contactModal = document.getElementById('contact-modal');
+    document.getElementById('brand-apply-link').addEventListener('click', () => openFormModal(brandModal));
+    document.getElementById('contact-link').addEventListener('click', () => openFormModal(contactModal));
+    const val = (form, name) => form[name].value.trim();
+    bindRequestForm(brandModal, 'brand_applications', form => ({
+      brand_name: val(form, 'brand_name'),
+      contact_name: val(form, 'contact_name'),
+      email: val(form, 'email').toLowerCase(),
+      instagram: val(form, 'instagram') || null,
+      website: val(form, 'website') || null,
+      category: form.category.value,
+      message: val(form, 'message'),
+    }), '✦ 입점 신청이 접수됐어요. 검토 후 이메일로 연락드릴게요');
+    bindRequestForm(contactModal, 'complaints', form => ({
+      email: val(form, 'email').toLowerCase(),
+      category: form.category.value,
+      subject: val(form, 'subject'),
+      message: val(form, 'message'),
+    }), '✦ 접수됐어요. 확인 후 이메일로 답변드릴게요');
     // #endregion
 
     // 헤더 [✦ Saved Looks (N)] 숫자 갱신 (로그인한 계정 / 게스트 보관함 기준)
@@ -3932,6 +4134,10 @@
         // 로그인한 유저면 Supabase saved_looks 테이블에도 저장
         if (!currentUser()) {
           showToast('✦ 이 브라우저에 저장했어요. 로그인하면 내 계정에도 저장돼요', 3500);
+          return;
+        }
+        if (!isApproved()) {
+          showToast('✦ 이 브라우저에 저장했어요. 가입 승인이 끝나면 내 계정에도 저장돼요', 4000);
           return;
         }
         const { error, id } = await saveLookToSupabase(look);
