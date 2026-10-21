@@ -3610,8 +3610,11 @@
     }
 
     // 룩을 Supabase saved_looks 테이블에 저장 (RLS 로 본인 행만 쓰기 가능) → 새 행 id 를 돌려줌
+    const uploadingLooks = new Set();
     async function saveLookToSupabase(look) {
       if (!sb || !authUser || !isApproved()) return { skipped: true };
+      if (uploadingLooks.has(look.id)) return { skipped: true };
+      uploadingLooks.add(look.id);
       try {
         const { data, error } = await sb.from('saved_looks').insert({
           user_id: authUser.id,
@@ -3622,7 +3625,27 @@
         return { error, id: data ? data.id : null };
       } catch (e) {
         return { error: e };
+      } finally {
+        uploadingLooks.delete(look.id);
       }
+    }
+
+    // 지운 룩 표시 (계정 삭제가 실패하거나 늦게 반영돼도 동기화 때 다시 나타나지 않게, 다음 동기화 때 다시 지움)
+    function deletedKey() {
+      const user = currentUser();
+      return 'mori_deleted_' + (user ? user.email : 'guest');
+    }
+    function readDeleted() { return new Set(readJSON(deletedKey(), [])); }
+    function rememberDeleted(ids) {
+      const set = readDeleted();
+      ids.forEach(id => set.add(id));
+      writeJSON(deletedKey(), [...set].slice(-500));
+    }
+    function forgetDeleted(ids) {
+      if (!ids.length) return;
+      const set = readDeleted();
+      ids.forEach(id => set.delete(id));
+      writeJSON(deletedKey(), [...set]);
     }
 
     // 로그인하면 계정에 저장된 룩을 이 브라우저 보관함과 맞춤
@@ -3634,11 +3657,19 @@
       if (syncingLooks) return syncingLooks;
       syncingLooks = (async () => {
         try {
-          const { data: rows, error } = await sb.from('saved_looks')
+          let { data: rows, error } = await sb.from('saved_looks')
             .select('id, title, items, total_price, created_at')
             .order('created_at', { ascending: true });
           if (error) { showToast('계정 룩을 불러오지 못했어요: ' + dbErrorText(error), 4500); return; }
 
+          // 이 브라우저에서 지운 룩이 계정에 남아 있으면 가져오지 않고 다시 지움
+          const deleted = readDeleted();
+          const leftovers = rows.filter(r => deleted.has(r.id)).map(r => r.id);
+          if (leftovers.length) await deleteLooksFromSupabase(leftovers.map(id => ({ dbId: id })), true);
+          forgetDeleted([...deleted].filter(id => !rows.some(r => r.id === id)));
+          rows = rows.filter(r => !deleted.has(r.id));
+
+          const startIds = new Set(readArchive().map(l => l.id));
           const dbIds = new Set(rows.map(r => r.id));
           let list = readArchive().filter(l => !l.dbId || dbIds.has(l.dbId));
           const known = new Set(list.map(l => l.dbId).filter(Boolean));
@@ -3664,6 +3695,17 @@
             const res = await saveLookToSupabase(look);
             if (!res.error && res.id) look.dbId = res.id;
           }
+          // 동기화하는 동안 이 브라우저에서 지운 룩은 빼고, 새로 저장한 룩은 더함 (덮어쓰기 방지)
+          const now = readArchive();
+          const nowById = new Map(now.map(l => [l.id, l]));
+          list = list.filter(l => !startIds.has(l.id) || nowById.has(l.id));
+          list.forEach(l => {
+            const n = nowById.get(l.id);
+            if (!n) return;
+            if (n.dbId && !l.dbId) l.dbId = n.dbId;
+            if (n.snapshot && !l.snapshot) l.snapshot = n.snapshot;
+          });
+          now.forEach(n => { if (!list.some(l => l.id === n.id)) list.push(n); });
           list.sort((a, b) => String(a.savedAt).localeCompare(String(b.savedAt)));
           writeArchive(list);
           updateSavedCount();
@@ -3679,17 +3721,19 @@
     }
 
     // 계정에서 룩 삭제 (dbId 가 있는 룩만). 성공하면 true
-    async function deleteLooksFromSupabase(looks) {
+    async function deleteLooksFromSupabase(looks, quiet) {
       const ids = looks.map(l => l.dbId).filter(Boolean);
       if (!ids.length || !sb || !authUser) return true;
+      rememberDeleted(ids);
       try {
-        const { error } = await sb.from('saved_looks').delete().in('id', ids);
-        if (error) { showToast('계정에서 삭제하지 못했어요: ' + dbErrorText(error), 4500); return false; }
-        return true;
+        const { data, error } = await sb.from('saved_looks').delete().in('id', ids).select('id');
+        if (error) throw error;
+        forgetDeleted((data || []).map(r => r.id));
       } catch (e) {
-        showToast('계정에서 삭제하지 못했어요: ' + dbErrorText(e), 4500);
-        return false;
+        // 이 브라우저에서는 지우고, 계정에서는 다음 접속(동기화) 때 다시 지움
+        if (!quiet) showToast('계정에서는 다음 접속 때 지울게요 (' + dbErrorText(e) + ')', 4500);
       }
+      return true;
     }
     // #endregion
 
@@ -4148,7 +4192,8 @@
         }
         const saved = readArchive();
         const mine = saved.find(l => l.id === look.id);
-        if (mine) { mine.dbId = id; writeArchive(saved); }
+        if (!mine && id) { await deleteLooksFromSupabase([{ dbId: id }], true); return; }
+        if (mine && id) { mine.dbId = id; writeArchive(saved); }
         showToast(`✦ ${look.title} 을(를) 내 계정에 저장했어요`);
       } finally {
         setSaving(false);
