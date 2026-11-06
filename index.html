@@ -160,10 +160,8 @@
       inset: 0;
       z-index: 2;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 22px;
       padding: 0 16px;
       pointer-events: none;
       animation: intro-rise 1.6s ease 0.3s both;
@@ -212,33 +210,6 @@
       transition: transform 0.18s ease, text-shadow 0.18s ease, opacity 0.45s ease 0.15s;
     }
     /* #endregion */
-
-    /* 질문 건너뛰고 바로 코디북으로: 큰 버튼 아래 반투명 크림색 알약 버튼 */
-    #skip-btn {
-      padding: 7px 18px;
-      border: 1px solid rgba(184, 149, 155, 0.6);
-      border-radius: 999px;
-      background: rgba(246, 239, 227, 0.82);
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
-      color: #3a302e;
-      font-family: var(--font-body);
-      font-style: italic;
-      font-size: clamp(13px, 1.4vw, 15px);
-      letter-spacing: 0.06em;
-      white-space: nowrap;
-      cursor: pointer;
-      box-shadow: 2px 2px 0 rgba(70, 66, 63, 0.25);
-      animation: intro-rise 1.6s ease 0.9s both;
-      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-    }
-    #skip-btn:hover,
-    #skip-btn:focus-visible {
-      transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0 rgba(70, 66, 63, 0.3);
-      background: #fffaf3;
-      outline: none;
-    }
 
     #intro-screen.fade-out {
       opacity: 0;
@@ -432,6 +403,28 @@
       cursor: pointer;
       border-color: rgb(var(--mute-pink));
       animation: closet-glow 2.4s ease-in-out infinite alternate;
+    }
+
+    /* 질문 건너뛰기: OPEN MY CURATED CLOSET 아래 가운데, 작은 글자 버튼 */
+    #skip-btn {
+      display: block;
+      margin: 22px auto 0;
+      padding: 4px 2px;
+      border: none;
+      border-bottom: 1px solid rgba(244, 239, 233, 0.3);
+      background: none;
+      color: rgba(244, 239, 233, 0.6);
+      font-family: var(--font-body);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    #skip-btn:hover,
+    #skip-btn:focus-visible {
+      color: #f4efe9;
+      border-color: rgb(var(--mute-pink));
+      outline: none;
     }
 
     @keyframes closet-glow {
@@ -2098,7 +2091,6 @@
     <!-- 화면 한가운데: 로고처럼 굵은 고딕 글자 버튼 -->
     <div class="intro-cta">
       <button type="button" id="enter-btn" class="logo-btn">OPEN THE DOOR!</button>
-      <button type="button" id="skip-btn">skip · 바로 코디북으로 →</button>
     </div>
   </section>
   <!-- #endregion -->
@@ -2121,6 +2113,7 @@
 
       <button type="button" id="quiz-back" hidden>← back</button>
       <button type="button" id="open-closet-btn" disabled>✦ OPEN MY CURATED CLOSET ✦</button>
+      <button type="button" id="skip-btn">SKIP QUESTIONS</button>
     </div>
   </section>
   <!-- #endregion -->
@@ -3216,14 +3209,14 @@
       }, 550);
     });
 
-    // 질문 없이 바로 코디북으로 (취향 맞춤 없이 전체 상품)
+    // 질문 화면에서 SKIP QUESTIONS → 바로 코디북으로 (취향 맞춤 없이 전체 상품)
     document.getElementById('skip-btn').addEventListener('click', function () {
-      if (!mainApp.hidden) return;
+      if (!mainApp.hidden || quizScreen.hidden) return;
       quizPrefs = null;
       forYouOnly = false;
       updateForYouBar();
       document.getElementById('curated-result').hidden = true;
-      switchScreen(introScreen, mainApp);
+      switchScreen(quizScreen, mainApp);
       renderProductItems();
     });
 
