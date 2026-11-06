@@ -149,4 +149,4 @@ grant select, update on public.brand_applications, public.complaints to authenti
 -- 5) 관리자 지정: 아래 이메일 계정을 관리자로 (사이트에서 먼저 회원가입해 둬야 함)
 -- ─────────────────────────────────────────────
 update public.profiles set role = 'admin', status = 'approved', approved_at = now()
-where email = 'lsyio1234@gmail.com';
+where email = 'YOUR_ADMIN_EMAIL@example.com';   -- ← 실행 전에 관리자 이메일로 바꾸기 (사이트에 공개되는 파일이라 실제 이메일은 적어 두지 않음)

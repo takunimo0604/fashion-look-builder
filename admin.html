@@ -532,22 +532,9 @@
       if (view === 'login-view') $('#me').textContent = '';
     }
 
-    // 운영자 이메일: DB 설정(admin.sql) 전이어도 관리자 화면은 열림 (데이터는 RLS 가 DB 의 role 로 다시 확인)
-    const ADMIN_EMAILS = ['lsyio1234@gmail.com'];
-
+    // 관리자 여부는 DB(profiles.role) 로만 판단 (데이터도 RLS 가 DB 의 role 로 다시 확인)
     async function checkAdmin(user) {
       const { data, error } = await sb.from('profiles').select('id, email, name, role, status').eq('id', user.id).maybeSingle();
-      if (ADMIN_EMAILS.includes(String(user.email || '').toLowerCase()) && (error || !data || data.role !== 'admin')) {
-        state.me = data || { id: user.id, email: user.email, role: 'admin' };
-        $('#me').textContent = '✦ ' + user.email;
-        show('dash-view');
-        await loadAll();
-        if (!error) {
-          state.errors.unshift('DB 에는 아직 관리자로 등록되지 않았어요. Supabase SQL Editor 에서 supabase/admin.sql 을 실행해야 승인·답변 저장이 돼요');
-          render();
-        }
-        return;
-      }
       if (error) {
         show('denied-view');
         $('#denied-text').textContent = errText(error);
