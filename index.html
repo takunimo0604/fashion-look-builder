@@ -1694,6 +1694,8 @@
       color: #f6efe3;
     }
     #auth-area .admin-link:hover { background: #b8959b; border-color: #b8959b; }
+    /* 로그인 후 헤더: 입점 신청 · 문의 버튼 */
+    #auth-area .auth-req-btn { white-space: nowrap; }
     .auth-msg {
       min-height: 18px;
       margin: 8px 0 0;
@@ -1968,8 +1970,7 @@
     .look-items li:hover { background: rgba(242, 235, 225, 0.6); }
     .color-chip { transition: background 0.25s ease; }
     .item-card:hover .color-chip { background: #eadfd2; }
-    #save-me-btn.is-saving,
-    #save-btn.is-saving { opacity: 0.6; cursor: progress; }
+    #save-me-btn.is-saving { opacity: 0.6; cursor: progress; }
     /* 키보드로 움직일 때 위치가 보이게 */
     #main-app button:focus-visible,
     .modal button:focus-visible,
@@ -2024,6 +2025,7 @@
       #main-app { padding: 12px 14px 80px; }
       #main-app > header { margin: -12px -14px 8px; padding: 10px 14px; }
       #main-app > header h1 { font-size: 19px; }
+      #auth-area { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
       #item-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
@@ -2220,9 +2222,6 @@
 
     <div id="action-buttons">
       <p id="look-total">TOTAL <strong id="look-total-value">0원</strong></p>
-      <button type="button" id="clear-btn">✦ CLEAR ARCHIVE</button>
-      <button type="button" id="archive-btn">MY ARCHIVE</button>
-      <button type="button" id="save-btn">SAVE MY MORI LOOK</button>
     </div>
 
     <footer>
@@ -2998,10 +2997,6 @@
       });
     });
 
-    // 룩 초기화 / 저장 버튼
-    document.getElementById('clear-btn').addEventListener('click', () => {
-      ['headwear', 'top', 'bottom', 'bag'].forEach(unwearSlot);
-    });
 
 
 
@@ -3340,7 +3335,7 @@
         authUser = null;
         authProfile = null;
         renderAuthArea();
-        showToast('가입이 승인되지 않은 계정이에요. 하단 문의 · 컴플레인으로 연락해 주세요', 5000);
+        showToast('가입이 승인되지 않은 계정이에요', 5000);
         return 'rejected';
       }
       renderAuthArea();
@@ -3354,6 +3349,7 @@
       return 'approved';
     }
 
+    let formAfterLogin = null;   // 비로그인 상태에서 누른 입점 신청/문의 창 → 로그인하면 바로 열어줌
     function currentUser() {
       if (!authUser) return null;
       const meta = authUser.user_metadata || {};
@@ -3419,6 +3415,12 @@
       if (status === 'admin') { authMessage(f, '✦ 관리자 페이지로 이동할게요', true); return; }
       f.reset();
       closeModal(authModal);
+      if (formAfterLogin && currentUser()) {   // 신청/문의 버튼 눌러서 로그인한 경우 → 그 창 바로 열기
+        const modal = formAfterLogin;
+        formAfterLogin = null;
+        openFormModal(modal);
+        return;
+      }
       if (status !== 'pending' && currentUser()) showToast(`✦ ${currentUser().name} 님, 다시 오신 걸 환영해요`);
     });
 
@@ -3554,6 +3556,15 @@
           admin.textContent = '✦ Admin';
           area.appendChild(admin);
         }
+        // 입점 신청 · 문의 (로그인한 계정만)
+        [['입점 신청', 'brand-modal'], ['문의', 'contact-modal']].forEach(([label, modalId]) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'modal-btn is-small auth-req-btn';
+          b.textContent = label;
+          b.addEventListener('click', () => openFormModal(document.getElementById(modalId)));
+          area.appendChild(b);
+        });
         const pending = authProfile && authProfile.status === 'pending';
         const out = document.createElement('button');
         out.type = 'button';
@@ -3573,7 +3584,7 @@
         login.type = 'button';
         login.className = 'modal-btn is-small';
         login.textContent = 'Login / Join';
-        login.addEventListener('click', () => { showAuthTab('login'); openModal(authModal); });
+        login.addEventListener('click', () => { formAfterLogin = null; showAuthTab('login'); openModal(authModal); });
         area.append(login);
       }
       updateSavedCount();
@@ -3737,7 +3748,7 @@
     }
     // #endregion
 
-    // #region 브랜드 입점 신청 · 문의/컴플레인 (비로그인도 보낼 수 있음 → 관리자 페이지에서 처리)
+    // #region 브랜드 입점 신청 · 문의/컴플레인 (로그인한 계정만 보낼 수 있음 → 관리자 페이지에서 처리)
     function formErrorText(error) {
       const msg = (error && (error.message || String(error))) || '';
       const code = (error && error.code) || '';
@@ -3747,6 +3758,13 @@
       return dbErrorText(error);
     }
     function openFormModal(modal) {
+      if (!currentUser()) {
+        formAfterLogin = modal;
+        showAuthTab('login');
+        openModal(authModal);
+        showToast('로그인 후 이용할 수 있어요');
+        return;
+      }
       const form = modal.querySelector('form');
       authMessage(form, '');
       if (currentUser() && !form.email.value) form.email.value = currentUser().email;
@@ -3758,9 +3776,10 @@
         e.preventDefault();
         const form = e.target;
         if (!sb) return noClient(form);
+        if (!currentUser()) { authMessage(form, '로그인이 풀렸어요. 다시 로그인한 뒤 보내 주세요'); return; }
         setBusy(form, true);
         try {
-          const { error } = await sb.from(table).insert(toRow(form));
+          const { error } = await sb.from(table).insert({ ...toRow(form), user_id: currentUser().id });
           if (error) { authMessage(form, '보내지 못했어요: ' + formErrorText(error)); return; }
           form.reset();
           authMessage(form, okText, true);
@@ -4089,8 +4108,6 @@
       showToast('저장한 코디를 모두 삭제했어요');
     });
 
-    document.getElementById('archive-btn').addEventListener('click', () => openLookbook(null));
-
     document.getElementById('reset-filters').addEventListener('click', () => {
       forYouOnly = false;
       updateForYouBar();
@@ -4101,7 +4118,6 @@
     document.getElementById('board-jump').addEventListener('click', () => {
       document.getElementById('layering-board').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    document.getElementById('save-me-btn').addEventListener('click', () => document.getElementById('save-btn').click());
     document.getElementById('board-clear-btn').addEventListener('click', () => {
       SLOT_ORDER.forEach(unwearSlot);
       showToast('코디북을 비웠어요');
@@ -4110,13 +4126,11 @@
     let savingLook = false;
     function setSaving(on) {
       savingLook = on;
-      ['save-btn', 'save-me-btn'].forEach(id => {
-        const b = document.getElementById(id);
-        b.disabled = on;
-        b.classList.toggle('is-saving', on);
-      });
+      const b = document.getElementById('save-me-btn');
+      b.disabled = on;
+      b.classList.toggle('is-saving', on);
     }
-    document.getElementById('save-btn').addEventListener('click', async () => {
+    document.getElementById('save-me-btn').addEventListener('click', async () => {
       if (savingLook) return;   // 저장 중 두 번 눌러도 한 번만
       // 빈 캔버스 방어: 모자·상의·하의 중 최소 1개 (가방만 있는 건 저장하지 않음)
       const items = wornItems();

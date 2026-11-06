@@ -81,12 +81,12 @@ create index if not exists brand_applications_status_idx on public.brand_applica
 
 alter table public.brand_applications enable row level security;
 
--- 누구나(비로그인 포함) 신청 가능, 단 처음 상태는 무조건 '대기'
+-- 로그인한 계정만 본인 이름으로 신청 가능, 단 처음 상태는 무조건 '대기'
 drop policy if exists "brand apply insert" on public.brand_applications;
 create policy "brand apply insert" on public.brand_applications
-  for insert to anon, authenticated
+  for insert to authenticated
   with check (status = 'pending' and admin_note is null and reviewed_at is null
-              and (user_id is null or user_id = (select auth.uid())));
+              and user_id = (select auth.uid()));
 
 drop policy if exists "brand apply select own or admin" on public.brand_applications;
 create policy "brand apply select own or admin" on public.brand_applications
@@ -116,10 +116,11 @@ create index if not exists complaints_status_idx on public.complaints (status);
 alter table public.complaints enable row level security;
 
 drop policy if exists "complaints insert" on public.complaints;
+-- 로그인한 계정만 본인 이름으로 문의 가능
 create policy "complaints insert" on public.complaints
-  for insert to anon, authenticated
+  for insert to authenticated
   with check (status = 'open' and admin_reply is null
-              and (user_id is null or user_id = (select auth.uid())));
+              and user_id = (select auth.uid()));
 
 drop policy if exists "complaints select own or admin" on public.complaints;
 create policy "complaints select own or admin" on public.complaints
